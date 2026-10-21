@@ -55,4 +55,10 @@ open "index.html"   # 雙擊即開
 
 ## Live
 
-未 Push。要上 Pages 另開 repo（建議名：`sen-pixel-mart`），**唔好蓋** `sen-unmanned-store`。
+| | |
+|---|---|
+| **Repo** | https://github.com/ihateusingai-beep/sen-pixel-mart |
+| **Pages** | https://ihateusingai-beep.github.io/sen-pixel-mart/ |
+
+課堂主力 plain UI 仍係：https://ihateusingai-beep.github.io/sen-unmanned-store/  
+**唔好**用本 repo 蓋過去。
