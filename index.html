@@ -489,16 +489,30 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
 }
 #mapStage{
   position:relative;
-  width:min(560px,92vw);
+  flex:0 0 auto;              /* 唔准被 column flex 壓扁，否則 aspect-ratio 會失效 */
+  /* 闊度上限 = min(固定上限, 視口, 高度上限 × 比例)。
+     咁樣 max-height 夾到高度時，闊度會跟住縮，格仔先至唔會被拉扁。 */
+  width:min(560px, 92vw, calc(min(46vh, 420px) * 1.2222));
   aspect-ratio: 11 / 9;
-  max-height:min(52vh,420px);
   background:#3d6b3a;
   border:4px solid #0D0E16;
   box-shadow:6px 6px 0 #0D0E16;
   image-rendering:pixelated;
   overflow:hidden;
 }
+/* ── pixel-art 畫布：內部 176×144 固定解析度，CSS 拉大做 pixelated 放大 ── */
+#mapCanvas{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  /* object-fit 係保險：萬一比例仍然被夾到，格仔都唔會變形，只會留邊 */
+  object-fit:contain;
+  display:block;
+  image-rendering:pixelated;
+  image-rendering:crisp-edges;
+}
+/* ── 透明互動層：負責點擊 + 讀屏名稱，唔畫任何嘢 ── */
 #mapGrid{
+  position:absolute; inset:0; z-index:2;
   display:grid;
   grid-template-columns:repeat(11,1fr);
   grid-template-rows:repeat(9,1fr);
@@ -506,47 +520,19 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
 }
 .map-cell{
   position:relative;
-  border:1px solid rgba(0,0,0,.15);
+  background:transparent;
+  border:0;
   display:grid; place-items:center;
-  font-size:clamp(0.7rem,2.8vw,1.15rem);
   line-height:1;
   user-select:none;
+  -webkit-tap-highlight-color:transparent;
 }
-.map-cell.floor{ background:#5a9a52; }
-.map-cell.wall{ background:#2a2d3d; box-shadow:inset 0 0 0 2px #0D0E16; }
-.map-cell.shelf{
-  background:#8b5a2b;
-  box-shadow:inset 0 -4px 0 #5a3a18, inset 0 0 0 2px #0D0E16;
-  cursor:pointer;
-}
-.map-cell.shelf.taken{ opacity:.35; filter:grayscale(.6); }
-.map-cell.counter{
-  background:#c4a574;
-  box-shadow:inset 0 0 0 3px #0D0E16;
-  cursor:pointer;
-}
-.map-cell.door{ background:#6ec6ff; }
-.map-cell.hot .bang{
-  position:absolute; top:-2px; right:0;
-  font-size:clamp(0.9rem,3vw,1.3rem);
-  animation:bangpop .6s ease-in-out infinite alternate;
-  z-index:3; pointer-events:none;
-}
-@keyframes bangpop{ from{transform:translateY(0)} to{transform:translateY(-4px)} }
-#player{
-  position:absolute; z-index:5;
-  width:calc(100% / 11);
-  height:calc(100% / 9);
-  display:grid; place-items:center;
-  font-size:clamp(1.1rem,4.2vw,1.7rem);
-  filter:drop-shadow(2px 2px 0 #0D0E16);
-  transition: left .12s steps(2), top .12s steps(2);
-  pointer-events:none;
-  line-height:1;
-}
-#player .face{ display:block; transform-origin:center bottom; }
-#player.walk .face{ animation:bob .18s steps(2) infinite; }
-@keyframes bob{ from{transform:translateY(0)} to{transform:translateY(2px)} }
+.map-cell.wall{ pointer-events:none; }
+/* 互動目標（貨架 / 櫃檯 / 門）俾個透明命中框，細手指都㩒得中 */
+.map-cell.hot-target{ cursor:pointer; }
+/* 附近有熱點 → 黃色虛線框（畫布畫「！」，呢度只做輔助提示） */
+.map-cell.hot{ box-shadow:inset 0 0 0 2px #F7D545; }
+.map-cell:focus-visible{ outline:3px solid #2F6FD0; outline-offset:-3px; }
 #mapPad{
   display:grid;
   grid-template-columns:repeat(3,64px);
@@ -568,6 +554,19 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
 #mapHint{
   color:var(--hud); font-weight:800; font-size:clamp(.9rem,2.2vw,1.1rem);
   text-align:center; margin:0;
+}
+/* ── 矮視窗（筆電、分屏、投影機 16:10）──
+   「清單常駐」係教學紅線：清單一被捲出畫面，學生就唔知要攞咩。
+   所以喺高度唔夠嘅螢幕，寧願壓細方向掣都要保住頂部清單。 */
+@media (max-height:820px){
+  #mapPad{
+    grid-template-columns:repeat(3,54px);
+    grid-template-rows:repeat(3,46px);
+    gap:4px;
+  }
+  #mapPad .pad{ width:54px; height:46px; font-size:1.15rem; }
+  #mapHint{ font-size:.85rem; }
+  #s-map{ gap:6px; }
 }
 
 </style>
@@ -625,9 +624,9 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
         </button>
       </div>
       <p id="mapHint">↑↓←→ 行路 · 走近貨架／櫃檯會出「！」· 㩒互動</p>
-      <div id="mapStage" aria-label="無人超市地圖">
+      <div id="mapStage" role="group" aria-label="無人超市地圖">
+        <canvas id="mapCanvas" width="176" height="144" aria-hidden="true"></canvas>
         <div id="mapGrid"></div>
-        <div id="player" aria-hidden="true"><span class="face">🧒</span></div>
       </div>
       <div id="mapPad" aria-label="方向掣">
         <button type="button" class="pad empty" tabindex="-1" aria-hidden="true"></button>
@@ -1050,6 +1049,10 @@ function renderDoor(){
    格仔移動 + 熱點互動 + 去櫃檯捷徑（唔係 open-world）
    ============================================================ */
 const MAP_W = 11, MAP_H = 9;
+const TILE = 16;                 // 每格 16×16 內部像素（GB feel）
+/* 自動行路：㩒遠格自動行過去，但只行唔自動互動 —— 學生仍然要自己㩒「互動」。
+   屬 v2.5「模式 A」，一行 AUTO_WALK = false 就可以收返。 */
+const AUTO_WALK = true;
 /* # wall · . floor · S shelf slot · C counter · D door · @ spawn */
 const MAP_LAYOUT = [
   "###########",
@@ -1066,8 +1069,19 @@ const SHELF_SLOTS = []; // filled {x,y}
 const COUNTER_POS = {x:5,y:7};
 let mapCells = []; // [y][x] -> div
 let shelfItems = []; // parallel to SHELF_SLOTS: item id or null if taken
-let player = {x:5, y:6, facing:0};
+const DIR_DOWN = 0, DIR_UP = 1, DIR_LEFT = 2, DIR_RIGHT = 3;
+let player = {x:5, y:6, facing:DIR_DOWN};
 let mapReady = false;
+let walkQueue = [];   // 自動行路剩低嘅步
+let walkFrame = 0;    // 0 = 站立, 1/2 = 擺腿
+let walking = false;
+let bangFrame = 0;
+let mapTimer = null;
+
+function onMapScreen(){
+  const s = $("#s-map");
+  return !!(s && s.classList.contains("active"));
+}
 
 (function indexMap(){
   for(let y=0;y<MAP_H;y++){
@@ -1076,6 +1090,261 @@ let mapReady = false;
     }
   }
 })();
+
+/* ============================================================
+   Pixel-art 引擎（純 canvas · 零依賴 · 離線）
+   ────────────────────────────────────────────────────────────
+   內部 176×144，靠 CSS pixelated 拉大 —— 同 Game Boy 一樣低解析 bitmap。
+   呢層純粹係「皮」：清單／籃／對貨／付費／星星全部一行冇改，
+   所以改皮唔會整爛教學流程。
+   ============================================================ */
+const PAL = {
+  k:"#14202B", K:"#2A2D3D", K2:"#434863",
+  g:"#4E8C4A", G:"#5EA055", g2:"#3F7439", g3:"#6FB061",
+  b:"#6B4426", B:"#8B5A2B", B2:"#A8703A",
+  c:"#E8443A", C:"#A82B26",
+  h:"#6B4226", H:"#8C5A34",
+  s:"#F2C48D", S:"#D99B62",
+  t:"#2F6FD0", T:"#1F4C9B",
+  p:"#3B3F52", P:"#262A38",
+  w:"#F7F7F2", y:"#F7D545", Y:"#C9A21F",
+  o:"#B07A2A", O:"#8A5F1E",
+  d:"#5EC8E8", D:"#3A9BBF",
+};
+const EMOJI_FONT = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+
+function getCtx(){
+  const cv = $("#mapCanvas");
+  if(!cv) return null;
+  if(!cv._ctx) cv._ctx = cv.getContext("2d");
+  cv._ctx.imageSmoothingEnabled = false;   // 唔好插值，維持硬邊
+  return cv._ctx;
+}
+function px(ctx,x,y,w,h,c){ ctx.fillStyle = PAL[c] || c; ctx.fillRect(x,y,w,h); }
+
+/* ── 地磚：棋盤格 + 固定雜訊（同一格永遠同一個樣，唔會閃） ── */
+function drawFloor(ctx,gx,gy){
+  const chk = ((gx+gy) % 2 === 0);
+  ctx.fillStyle = PAL[chk ? "G" : "g"];
+  ctx.fillRect(0,0,TILE,TILE);
+  const hsh = ((gx*73856093) ^ (gy*19349663)) >>> 0;
+  ctx.fillStyle = PAL[chk ? "g3" : "g2"];
+  ctx.fillRect((hsh % 12) + 2, ((hsh >> 4) % 12) + 2, 1, 1);
+  ctx.fillRect(((hsh >> 8) % 12) + 2, ((hsh >> 12) % 12) + 2, 1, 1);
+}
+
+/* ── 牆：錯位磚紋 ── */
+function drawWall(ctx){
+  px(ctx,0,0,16,16,"K");
+  ctx.fillStyle = PAL.K2;
+  for(let r=0;r<4;r++){
+    const y = r*4;
+    ctx.fillRect(0,y,16,1);
+    const off = (r % 2) ? 0 : 4;
+    for(let bx = off; bx < 16; bx += 8) ctx.fillRect(bx,y,1,4);
+  }
+  px(ctx,0,0,16,1,"K2");
+}
+
+/* ── 貨架：木板架，攞完變暗 ── */
+function drawShelf(ctx,empty){
+  px(ctx,0,0,16,16,"B");
+  px(ctx,0,0,16,2,"b");
+  px(ctx,0,5,16,1,"b");
+  px(ctx,0,9,16,1,"b");
+  px(ctx,0,14,16,2,"b");
+  px(ctx,0,0,1,16,"b");
+  px(ctx,15,0,1,16,"b");
+  px(ctx,2,3,1,1,"B2");
+  px(ctx,13,7,1,1,"B2");
+  if(empty){
+    ctx.fillStyle = PAL.k;
+    ctx.globalAlpha = .3;
+    ctx.fillRect(0,0,16,16);
+    ctx.globalAlpha = 1;
+  }
+}
+
+/* ── 櫃檯：檯面 + 收銀機（收銀機靠左，頂中間留空俾「！」提示） ── */
+function drawCounter(ctx){
+  px(ctx,0,5,16,11,"o");
+  px(ctx,0,5,16,1,"O");
+  px(ctx,0,3,16,2,"w");
+  px(ctx,0,13,16,3,"O");
+  px(ctx,1,0,6,3,"k");
+  px(ctx,2,0,4,2,"d");
+  px(ctx,9,8,4,1,"O");
+  px(ctx,9,11,4,1,"O");
+  px(ctx,2,8,2,2,"k");
+  px(ctx,2,11,2,2,"k");
+}
+
+/* ── 門口 ── */
+function drawDoor(ctx){
+  px(ctx,0,0,16,16,"k");
+  px(ctx,1,1,14,10,"d");
+  px(ctx,2,2,4,1,"w");
+  px(ctx,2,4,2,1,"D");
+  px(ctx,11,7,1,3,"y");
+  px(ctx,1,11,14,5,"K");
+  px(ctx,3,13,10,1,"K2");
+}
+
+/* ── 角色：4 向（左右鏡像）+ 3 幀腿 ──
+   腿先畫、身體後畫蓋住髖位，同真實 tile 角色一樣分層。 */
+function drawKid(ctx,dir,frame){
+  ctx.save();
+  if(walking && frame) ctx.translate(0,-1);      // 走起上落 1px
+
+  if(frame === 1){        // 左腳踏前
+    px(ctx,4,13,3,2,"p"); px(ctx,5,14,2,2,"p"); px(ctx,4,15,3,1,"k");
+    px(ctx,9,13,2,3,"P"); px(ctx,9,15,2,1,"k");
+  }else if(frame === 2){  // 右腳踏前
+    px(ctx,5,13,2,3,"P"); px(ctx,5,15,2,1,"k");
+    px(ctx,9,13,3,2,"p"); px(ctx,10,14,2,2,"p"); px(ctx,9,15,3,1,"k");
+  }else{                  // 企定
+    px(ctx,5,13,2,3,"p"); px(ctx,9,13,2,3,"p");
+    px(ctx,5,15,2,1,"k"); px(ctx,9,15,2,1,"k");
+  }
+
+  if(dir === DIR_DOWN){
+    px(ctx,4,1,7,1,"c"); px(ctx,3,2,9,1,"c"); px(ctx,3,3,9,1,"C");
+    px(ctx,3,3,1,3,"h"); px(ctx,12,3,1,3,"h");
+    px(ctx,4,4,7,4,"s");
+    px(ctx,5,5,1,2,"k"); px(ctx,9,5,1,2,"k");
+    px(ctx,6,7,3,1,"S"); px(ctx,6,8,3,1,"S");
+    px(ctx,2,9,1,4,"T"); px(ctx,13,9,1,4,"T");
+    px(ctx,3,9,9,4,"t"); px(ctx,3,12,9,1,"T");
+  }else if(dir === DIR_UP){
+    px(ctx,4,1,7,1,"c"); px(ctx,3,2,9,1,"C");
+    px(ctx,3,3,10,6,"h"); px(ctx,4,4,8,1,"H");
+    px(ctx,2,9,1,4,"T"); px(ctx,13,9,1,4,"T");
+    px(ctx,3,9,9,4,"t"); px(ctx,3,12,9,1,"T");
+  }else{                 // DIR_RIGHT（左向由外面鏡像）
+    px(ctx,3,1,7,1,"c"); px(ctx,3,2,4,1,"c"); px(ctx,7,1,6,1,"c");
+    px(ctx,2,3,3,6,"h");
+    px(ctx,5,3,6,5,"s");
+    px(ctx,8,4,1,2,"k");
+    px(ctx,10,5,1,1,"s");
+    px(ctx,7,7,3,1,"S");
+    px(ctx,2,9,1,4,"T");
+    px(ctx,3,9,9,4,"t"); px(ctx,3,12,9,1,"T");
+  }
+  ctx.restore();
+}
+
+/* ── 「！」提示：兩幀上落，Pokémon 式浮喺熱點上面 ──
+   帶黑邊先畫黃色，咁樣企喺任何背景（地磚／角色／貨架）都睇得清。 */
+function drawBang(ctx){
+  const oy = bangFrame ? -2 : 0;
+  px(ctx,0,oy-1,12,10,"k");          // 黑邊
+  px(ctx,0,oy,10,8,"y");
+  px(ctx,0,oy,10,1,"w");
+  px(ctx,0,oy+7,10,1,"Y");
+  px(ctx,4,oy+2,2,4,"k");
+  px(ctx,4,oy+6,2,1,"k");
+}
+
+/* 貨架上面嘅嘢用 emoji 畫：特教學生靠樣認嘢，
+   唔好用抽象 pixel 圖案取代（會失去辨識度）。 */
+function drawItemEmoji(ctx,id,tx,ty){
+  if(!id) return;
+  ctx.save();
+  ctx.font = `13px ${EMOJI_FONT}`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(ITEMS[id].emo, tx*TILE + TILE/2, ty*TILE + 7);
+  ctx.restore();
+}
+
+function drawMap(){
+  const ctx = getCtx();
+  if(!ctx) return;
+  ctx.clearRect(0,0,MAP_W*TILE,MAP_H*TILE);
+  for(let y=0;y<MAP_H;y++){
+    for(let x=0;x<MAP_W;x++){
+      const ch = MAP_LAYOUT[y][x];
+      ctx.save();
+      ctx.translate(x*TILE, y*TILE);
+      if(ch === "#")      drawWall(ctx);
+      else if(ch === "S") drawShelf(ctx, !shelfItems[shelfIndexAt(x,y)]);
+      else if(ch === "C") drawCounter(ctx);
+      else if(ch === "D") drawDoor(ctx);
+      else                drawFloor(ctx,x,y);
+      ctx.restore();
+    }
+  }
+  SHELF_SLOTS.forEach((s,i)=>{ drawItemEmoji(ctx, shelfItems[i], s.x, s.y); });
+
+  ctx.save();
+  ctx.translate(player.x*TILE, player.y*TILE);
+  if(player.facing === DIR_LEFT){ ctx.translate(TILE,0); ctx.scale(-1,1); }
+  drawKid(ctx, player.facing, walking ? walkFrame : 0);
+  ctx.restore();
+
+  // 「！」一定要最後畫：角色行到熱點前面時，標記唔可以被角色蓋住
+  const h = hotspotNear(player.x, player.y);
+  if(h){
+    ctx.save();
+    ctx.translate(h.x*TILE + 2, h.y*TILE - 11);   // 完全浮喺熱點格上面
+    drawBang(ctx);
+    ctx.restore();
+  }
+}
+
+/* ── 動畫 + 自動行路驅動（單一 150ms 節拍） ── */
+function mapLoop(){
+  if(!onMapScreen()){ walkQueue.length = 0; walking = false; return; }
+  if(walkQueue.length){
+    const s = walkQueue.shift();
+    walking = true;
+    walkFrame = (walkFrame % 2) + 1;
+    stepPlayer(s.x - player.x, s.y - player.y, true);   // quiet：自動行路唔唸出嚟
+  }else{
+    walking = false;
+    walkFrame = 0;
+  }
+  bangFrame = bangFrame ? 0 : 1;
+  drawMap();
+}
+function startMapLoop(){
+  if(mapTimer) return;
+  mapTimer = setInterval(mapLoop, 150);
+}
+
+/* ── BFS 搵路（11×9 = 99 格，快到唔需要 cache） ── */
+function pathTo(tx,ty){
+  if(!isWalkable(tx,ty)) return null;
+  const sk = player.y*MAP_W + player.x;
+  const goal = ty*MAP_W + tx;
+  if(sk === goal) return [];
+  const prev = new Int32Array(MAP_W*MAP_H).fill(-1);
+  const seen = new Uint8Array(MAP_W*MAP_H);
+  const q = [sk];
+  seen[sk] = 1;
+  for(let i=0;i<q.length;i++){
+    const cur = q[i];
+    if(cur === goal) break;
+    const cx = cur % MAP_W, cy = (cur - cx) / MAP_W;
+    const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+    for(let d=0;d<dirs.length;d++){
+      const nx = cx + dirs[d][0], ny = cy + dirs[d][1];
+      const ni = ny*MAP_W + nx;
+      if(seen[ni] || !isWalkable(nx,ny)) continue;
+      seen[ni] = 1;
+      prev[ni] = cur;
+      q.push(ni);
+    }
+  }
+  if(!seen[goal]) return null;
+  const out = [];
+  let n = goal;
+  while(n !== sk && n !== -1){
+    out.push({ x: n % MAP_W, y: (n - (n % MAP_W)) / MAP_W });
+    n = prev[n];
+  }
+  return out.reverse();
+}
 
 function renderListStrip(){
   const L = LISTS[state.listIndex];
@@ -1092,6 +1361,7 @@ function renderListStrip(){
   });
 }
 
+/* 互動層：淨係負責點擊 + 讀屏名稱，畫面全部由 canvas 畫 */
 function buildMapGrid(){
   const grid = $("#mapGrid");
   if(!grid) return;
@@ -1104,11 +1374,21 @@ function buildMapGrid(){
       const cell = document.createElement("div");
       cell.className = "map-cell";
       cell.dataset.x = x; cell.dataset.y = y;
-      if(ch==="#") cell.classList.add("wall");
-      else if(ch==="S") cell.classList.add("floor","shelf");
-      else if(ch==="C") cell.classList.add("floor","counter");
-      else if(ch==="D"){ cell.classList.add("floor","door"); cell.textContent="🚪"; }
-      else cell.classList.add("floor");
+      if(ch === "#"){
+        cell.classList.add("wall");
+        cell.setAttribute("aria-hidden","true");
+      }else if(ch === "S"){
+        cell.setAttribute("role","img");
+        cell.setAttribute("aria-label","貨架");
+      }else if(ch === "C"){
+        cell.setAttribute("role","img");
+        cell.setAttribute("aria-label","櫃檯");
+      }else if(ch === "D"){
+        cell.setAttribute("role","img");
+        cell.setAttribute("aria-label","門口");
+      }else{
+        cell.setAttribute("aria-label","地板");
+      }
       cell.addEventListener("click", ()=>onMapCellTap(x,y));
       grid.appendChild(cell);
       mapCells[y][x]=cell;
@@ -1117,12 +1397,8 @@ function buildMapGrid(){
   mapReady = true;
 }
 
-function placePlayer(){
-  const el = $("#player");
-  if(!el) return;
-  el.style.left = (player.x / MAP_W * 100) + "%";
-  el.style.top  = (player.y / MAP_H * 100) + "%";
-}
+/* 舊名留返做 alias：原本係擺 DOM position，canvas 版直接重畫成張圖 */
+function placePlayer(){ drawMap(); }
 
 function isWalkable(x,y){
   if(x<0||y<0||x>=MAP_W||y>=MAP_H) return false;
@@ -1131,23 +1407,32 @@ function isWalkable(x,y){
   // S and C walkable so SEN can stand on hotspot
 }
 
-function tryMove(dx,dy){
-  if(!$(" #s-map")?.classList.contains("active") && !$("#s-map")?.classList.contains("active")) return;
-  if(!$("#s-map").classList.contains("active")) return;
+/* 實際行一步。quiet = 自動行路用（唔重複叫 TTS，唔會嘈住學生） */
+function stepPlayer(dx,dy,quiet){
   const nx = player.x + dx, ny = player.y + dy;
-  if(!isWalkable(nx,ny)){ beep([200]); return; }
+  if(!isWalkable(nx,ny)){ walkQueue.length = 0; beep([200]); return false; }
   player.x = nx; player.y = ny;
-  if(dx) player.facing = dx>0?1:-1;
-  const p = $("#player");
-  if(p){ p.classList.add("walk"); clearTimeout(p._t); p._t=setTimeout(()=>p.classList.remove("walk"),180); }
+  if(dx > 0)      player.facing = DIR_RIGHT;
+  else if(dx < 0) player.facing = DIR_LEFT;
+  else if(dy > 0) player.facing = DIR_DOWN;
+  else if(dy < 0) player.facing = DIR_UP;
   SFX.soft();
   placePlayer();
   updateHotspots();
-  const h = hotspotAt(player.x, player.y) || hotspotNear(player.x, player.y);
-  if(h){
-    if(h.type==="shelf" && h.id) say(`附近有 ${ITEMS[h.id].name}。㩒「互動」攞入籃。`,"neutral");
-    else if(h.type==="counter") say("到櫃檯啦。㩒「互動」或者「去櫃檯」。","neutral");
+  if(!quiet){
+    const h = hotspotAt(player.x, player.y) || hotspotNear(player.x, player.y);
+    if(h){
+      if(h.type==="shelf" && h.id) say(`附近有 ${ITEMS[h.id].name}。㩒「互動」攞入籃。`,"neutral");
+      else if(h.type==="counter") say("到櫃檯啦。㩒「互動」或者「去櫃檯」。","neutral");
+    }
   }
+  return true;
+}
+
+function tryMove(dx,dy){
+  if(!onMapScreen()) return;
+  walkQueue.length = 0;      // 手掣即刻接管，自動行路即刻收皮
+  stepPlayer(dx,dy,false);
 }
 
 function shelfIndexAt(x,y){
@@ -1172,45 +1457,27 @@ function hotspotNear(x,y){
 }
 
 function updateHotspots(){
-  // clear bangs
-  $$(".map-cell .bang").forEach(b=>b.remove());
   $$(".map-cell.hot").forEach(c=>c.classList.remove("hot"));
-  // paint shelves
+  $$(".map-cell.hot-target").forEach(c=>c.classList.remove("hot-target"));
+  // 貨架：有嘢嗰格先係可互動目標；讀屏名稱跟住架上嘅嘢變
   SHELF_SLOTS.forEach((s,i)=>{
     const cell = mapCells[s.y]?.[s.x];
     if(!cell) return;
     const id = shelfItems[i];
-    cell.classList.toggle("taken", !id);
-    // wipe old emo text except bang
-    cell.querySelectorAll(".emo").forEach(e=>e.remove());
     if(id){
-      const sp=document.createElement("span");
-      sp.className="emo";
-      sp.textContent = ITEMS[id].emo;
-      cell.appendChild(sp);
+      cell.classList.add("hot-target");
+      cell.setAttribute("aria-label", `貨架：${ITEMS[id].name}`);
     }else{
-      cell.insertAdjacentHTML("beforeend",'<span class="emo">📦</span>');
+      cell.setAttribute("aria-label", "貨架（空）");
     }
   });
-  // counter label
   const cc = mapCells[COUNTER_POS.y]?.[COUNTER_POS.x];
-  if(cc && !cc.querySelector(".emo")){
-    const sp=document.createElement("span");
-    sp.className="emo"; sp.textContent="💰";
-    cc.appendChild(sp);
-  }
-  // bang on near hotspot
+  if(cc){ cc.classList.add("hot-target"); cc.setAttribute("aria-label","櫃檯：付錢"); }
+  // 附近熱點：黃框 + canvas 畫「！」
   const h = hotspotNear(player.x, player.y);
   if(h){
     const cell = mapCells[h.y]?.[h.x];
-    if(cell){
-      cell.classList.add("hot");
-      if(!cell.querySelector(".bang")){
-        const b=document.createElement("span");
-        b.className="bang"; b.textContent="！";
-        cell.appendChild(b);
-      }
-    }
+    if(cell) cell.classList.add("hot");
   }
   // interact button label
   const btn = $("#btnInteract");
@@ -1220,6 +1487,7 @@ function updateHotspots(){
     else if(h?.type==="counter") btn.innerHTML = `<span class="ico">💰</span> 去結帳`;
     else btn.innerHTML = `<span class="ico">✨</span> 互動`;
   }
+  drawMap();
 }
 
 function renderMap(){
@@ -1228,11 +1496,13 @@ function renderMap(){
   const ids = L.items.concat(L.shelf);
   // assign up to shelf slots
   shelfItems = SHELF_SLOTS.map((_,i)=> ids[i] || null);
-  player.x = 5; player.y = 6;
+  player.x = 5; player.y = 6; player.facing = DIR_DOWN;
+  walkQueue.length = 0; walking = false; walkFrame = 0;
   renderListStrip();
   placePlayer();
   updateHotspots();
   renderBasket();
+  startMapLoop();
   say("歡迎光臨 PIXEL MART！睇住清單，行去貨架攞嘢，再去櫃檯付足錢。","happy");
 }
 
@@ -1255,7 +1525,7 @@ function pickItemFromMap(id, shelfIndex){
 }
 
 function doInteract(){
-  if(!$("#s-map").classList.contains("active")) return;
+  if(!onMapScreen()) return;
   const h = hotspotNear(player.x, player.y);
   if(!h){ say("行近貨架或者櫃檯，先可以互動。","think"); beep([240]); return; }
   if(h.type==="shelf"){
@@ -1281,19 +1551,23 @@ function goToCheckout(){
 }
 
 function onMapCellTap(x,y){
-  if(!$("#s-map").classList.contains("active")) return;
-  // tap adjacent or self to step toward / interact
+  if(!onMapScreen()) return;
+  if(x===player.x && y===player.y){ walkQueue.length = 0; doInteract(); return; }
+  // 自動行路：BFS 搵路，之後逐拍行（只行唔互動 ——
+  // 「攞唔攞」呢個決定一定要學生自己撳，唔可以自動代佢決定）
+  if(AUTO_WALK){
+    const path = pathTo(x,y);
+    if(path && path.length){ walkQueue = path; walking = true; return; }
+  }
+  // 冇路徑 / 關咗自動行路：沿最短方向行一步
+  walkQueue.length = 0;
   const dx = Math.sign(x - player.x), dy = Math.sign(y - player.y);
-  if(x===player.x && y===player.y){ doInteract(); return; }
-  // one step toward
   if(Math.abs(x-player.x)+Math.abs(y-player.y)===1){
-    tryMove(x-player.x, y-player.y);
-    // if landed on hotspot auto-prompt
+    stepPlayer(dx,dy,false);
     return;
   }
-  // multi-step: step once toward
-  if(dx && isWalkable(player.x+dx, player.y)) tryMove(dx,0);
-  else if(dy && isWalkable(player.x, player.y+dy)) tryMove(0,dy);
+  if(dx && isWalkable(player.x+dx, player.y)) stepPlayer(dx,0,false);
+  else if(dy && isWalkable(player.x, player.y+dy)) stepPlayer(0,dy,false);
   else beep([200]);
 }
 
