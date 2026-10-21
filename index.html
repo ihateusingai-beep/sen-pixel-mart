@@ -476,6 +476,100 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
   #bubble{margin-bottom:0;}
   #basket{min-width:0;}
 }
+
+/* ========== PIXEL MART 地圖探索 ========== */
+#s-map{ gap:10px; padding-top:10px; }
+#mapHud{
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:center;
+  width:100%; max-width:920px;
+}
+#mapHud #listStrip{ margin:0; flex:1 1 220px; }
+#btnGoCounter{
+  min-height:64px; min-width:min(200px,46vw); font-size:1.05rem;
+}
+#mapStage{
+  position:relative;
+  width:min(560px,92vw);
+  aspect-ratio: 11 / 9;
+  max-height:min(52vh,420px);
+  background:#3d6b3a;
+  border:4px solid #0D0E16;
+  box-shadow:6px 6px 0 #0D0E16;
+  image-rendering:pixelated;
+  overflow:hidden;
+}
+#mapGrid{
+  display:grid;
+  grid-template-columns:repeat(11,1fr);
+  grid-template-rows:repeat(9,1fr);
+  width:100%; height:100%;
+}
+.map-cell{
+  position:relative;
+  border:1px solid rgba(0,0,0,.15);
+  display:grid; place-items:center;
+  font-size:clamp(0.7rem,2.8vw,1.15rem);
+  line-height:1;
+  user-select:none;
+}
+.map-cell.floor{ background:#5a9a52; }
+.map-cell.wall{ background:#2a2d3d; box-shadow:inset 0 0 0 2px #0D0E16; }
+.map-cell.shelf{
+  background:#8b5a2b;
+  box-shadow:inset 0 -4px 0 #5a3a18, inset 0 0 0 2px #0D0E16;
+  cursor:pointer;
+}
+.map-cell.shelf.taken{ opacity:.35; filter:grayscale(.6); }
+.map-cell.counter{
+  background:#c4a574;
+  box-shadow:inset 0 0 0 3px #0D0E16;
+  cursor:pointer;
+}
+.map-cell.door{ background:#6ec6ff; }
+.map-cell.hot .bang{
+  position:absolute; top:-2px; right:0;
+  font-size:clamp(0.9rem,3vw,1.3rem);
+  animation:bangpop .6s ease-in-out infinite alternate;
+  z-index:3; pointer-events:none;
+}
+@keyframes bangpop{ from{transform:translateY(0)} to{transform:translateY(-4px)} }
+#player{
+  position:absolute; z-index:5;
+  width:calc(100% / 11);
+  height:calc(100% / 9);
+  display:grid; place-items:center;
+  font-size:clamp(1.1rem,4.2vw,1.7rem);
+  filter:drop-shadow(2px 2px 0 #0D0E16);
+  transition: left .12s steps(2), top .12s steps(2);
+  pointer-events:none;
+  line-height:1;
+}
+#player .face{ display:block; transform-origin:center bottom; }
+#player.walk .face{ animation:bob .18s steps(2) infinite; }
+@keyframes bob{ from{transform:translateY(0)} to{transform:translateY(2px)} }
+#mapPad{
+  display:grid;
+  grid-template-columns:repeat(3,64px);
+  grid-template-rows:repeat(3,56px);
+  gap:6px; justify-content:center; align-items:center;
+  margin-top:2px;
+}
+#mapPad .pad{
+  width:64px; height:56px; border:3px solid #0D0E16; border-radius:0;
+  background:var(--card); color:var(--ink); font-size:1.4rem; font-weight:900;
+  box-shadow:3px 3px 0 #0D0E16; cursor:pointer; font-family:inherit;
+}
+#mapPad .pad:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 #0D0E16; }
+#mapPad .pad.empty{ visibility:hidden; pointer-events:none; box-shadow:none; }
+#btnInteract{
+  min-height:64px; min-width:min(280px,80vw);
+  font-size:clamp(1.1rem,3vw,1.4rem);
+}
+#mapHint{
+  color:var(--hud); font-weight:800; font-size:clamp(.9rem,2.2vw,1.1rem);
+  text-align:center; margin:0;
+}
+
 </style>
 </head>
 <body>
@@ -519,20 +613,39 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
       <div class="lists" id="doorLists"></div>
     </section>
 
-    <!-- ── 畫面 2：店內貨架取貨 ───────────────────── -->
-    <section class="screen" id="s-shop">
-      <h2 class="screen-h">貨架</h2>
-      <p class="hint">睇住上面清單，㩒需要嘅嘢放入籃</p>
-      <div id="listStrip" aria-label="而家呢張購物清單">
-        <span class="ls-lab">清單</span>
-        <div class="ls-items" id="listStripItems"></div>
+    <!-- ── 畫面 2：超市地圖探索 ───────────────────── -->
+    <section class="screen" id="s-map">
+      <div id="mapHud">
+        <div id="listStrip" aria-label="而家呢張購物清單">
+          <span class="ls-lab">清單</span>
+          <div class="ls-items" id="listStripItems"></div>
+        </div>
+        <button class="big primary" id="btnGoCounter" type="button">
+          <span class="ico">💰</span> 去櫃檯
+        </button>
       </div>
-      <div class="card" style="padding:14px 18px;">
-        <div class="tiles" id="shelf"></div>
+      <p id="mapHint">↑↓←→ 行路 · 走近貨架／櫃檯會出「！」· 㩒互動</p>
+      <div id="mapStage" aria-label="無人超市地圖">
+        <div id="mapGrid"></div>
+        <div id="player" aria-hidden="true"><span class="face">🧒</span></div>
       </div>
-      <button class="big primary" id="btnToCheck" type="button">
-        <span class="ico">✅</span> 我攞完啦，核對一下
+      <div id="mapPad" aria-label="方向掣">
+        <button type="button" class="pad empty" tabindex="-1" aria-hidden="true"></button>
+        <button type="button" class="pad" id="padUp" aria-label="上">▲</button>
+        <button type="button" class="pad empty" tabindex="-1" aria-hidden="true"></button>
+        <button type="button" class="pad" id="padLeft" aria-label="左">◀</button>
+        <button type="button" class="pad" id="padAct" aria-label="互動">Ａ</button>
+        <button type="button" class="pad" id="padRight" aria-label="右">▶</button>
+        <button type="button" class="pad empty" tabindex="-1" aria-hidden="true"></button>
+        <button type="button" class="pad" id="padDown" aria-label="下">▼</button>
+        <button type="button" class="pad empty" tabindex="-1" aria-hidden="true"></button>
+      </div>
+      <button class="big primary" id="btnInteract" type="button">
+        <span class="ico">✨</span> 互動
       </button>
+      <!-- 隱藏兼容：舊 shelf 容器畀 tools 唔爆 -->
+      <div id="shelf" hidden></div>
+      <button id="btnToCheck" type="button" hidden>核對</button>
     </section>
 
     <!-- ── 畫面 3：核對枱（逐項自己核對） ─────────── -->
@@ -874,7 +987,7 @@ function lockInput(){ inputLockUntil = performance.now() + INPUT_LOCK_MS; }
 function go(stage){
   $$(".screen").forEach(s=>s.classList.remove("active"));
   const map = {
-    cover:"#s-cover", door:"#s-door", shop:"#s-shop",
+    cover:"#s-cover", door:"#s-door", map:"#s-map", shop:"#s-map",
     check:"#s-check", declare:"#s-declare", pay:"#s-pay",
     result:"#s-result", cert:"#s-cert",
   };
@@ -931,50 +1044,265 @@ function renderDoor(){
   });
 }
 
+
 /* ============================================================
-   畫面 2：取貨
+   畫面 2：PIXEL MART 單屏地圖探索
+   格仔移動 + 熱點互動 + 去櫃檯捷徑（唔係 open-world）
    ============================================================ */
-function renderShop(){
-  const L = LISTS[state.listIndex];
-  const ids = L.items.concat(L.shelf);
-  // 常駐清單條：學生入店後仍要睇到要攞咩（唔靠記門口嗰頁）
-  const strip = $("#listStripItems");
-  if(strip){
-    strip.innerHTML = "";
-    L.items.forEach(id=>{
-      const d = document.createElement("div");
-      d.className = "ls-dot";
-      d.textContent = ITEMS[id].emo;
-      d.setAttribute("role", "img");
-      d.setAttribute("aria-label", ITEMS[id].name);
-      strip.appendChild(d);
-    });
+const MAP_W = 11, MAP_H = 9;
+/* # wall · . floor · S shelf slot · C counter · D door · @ spawn */
+const MAP_LAYOUT = [
+  "###########",
+  "#D........#",
+  "#.S.S.S...#",
+  "#.........#",
+  "#.S.S.S...#",
+  "#.........#",
+  "#.........#",
+  "#....C....#",
+  "###########",
+];
+const SHELF_SLOTS = []; // filled {x,y}
+const COUNTER_POS = {x:5,y:7};
+let mapCells = []; // [y][x] -> div
+let shelfItems = []; // parallel to SHELF_SLOTS: item id or null if taken
+let player = {x:5, y:6, facing:0};
+let mapReady = false;
+
+(function indexMap(){
+  for(let y=0;y<MAP_H;y++){
+    for(let x=0;x<MAP_W;x++){
+      if(MAP_LAYOUT[y][x]==="S") SHELF_SLOTS.push({x,y});
+    }
   }
-  const shelf = $("#shelf"); shelf.innerHTML = "";
-  ids.forEach(id=>{
-    const b = document.createElement("button");
-    b.type = "button"; b.className = "tile";
-    b.innerHTML = `<span class="emo">${ITEMS[id].emo}</span><span class="nm">${ITEMS[id].name}</span>`;
-    b.addEventListener("click", ()=>pickItem(id, b));
-    shelf.appendChild(b);
+})();
+
+function renderListStrip(){
+  const L = LISTS[state.listIndex];
+  const strip = $("#listStripItems");
+  if(!strip) return;
+  strip.innerHTML = "";
+  L.items.forEach(id=>{
+    const d = document.createElement("div");
+    d.className = "ls-dot";
+    d.textContent = ITEMS[id].emo;
+    d.setAttribute("role","img");
+    d.setAttribute("aria-label", ITEMS[id].name);
+    strip.appendChild(d);
   });
-  say("睇住上面清單，㩒需要嘅嘢放入籃，慢慢嚟。", "neutral");
 }
 
-function pickItem(id, el){
+function buildMapGrid(){
+  const grid = $("#mapGrid");
+  if(!grid) return;
+  grid.innerHTML = "";
+  mapCells = [];
+  for(let y=0;y<MAP_H;y++){
+    mapCells[y]=[];
+    for(let x=0;x<MAP_W;x++){
+      const ch = MAP_LAYOUT[y][x];
+      const cell = document.createElement("div");
+      cell.className = "map-cell";
+      cell.dataset.x = x; cell.dataset.y = y;
+      if(ch==="#") cell.classList.add("wall");
+      else if(ch==="S") cell.classList.add("floor","shelf");
+      else if(ch==="C") cell.classList.add("floor","counter");
+      else if(ch==="D"){ cell.classList.add("floor","door"); cell.textContent="🚪"; }
+      else cell.classList.add("floor");
+      cell.addEventListener("click", ()=>onMapCellTap(x,y));
+      grid.appendChild(cell);
+      mapCells[y][x]=cell;
+    }
+  }
+  mapReady = true;
+}
+
+function placePlayer(){
+  const el = $("#player");
+  if(!el) return;
+  el.style.left = (player.x / MAP_W * 100) + "%";
+  el.style.top  = (player.y / MAP_H * 100) + "%";
+}
+
+function isWalkable(x,y){
+  if(x<0||y<0||x>=MAP_W||y>=MAP_H) return false;
+  const ch = MAP_LAYOUT[y][x];
+  return ch==="." || ch==="D" || ch==="C" || ch==="S";
+  // S and C walkable so SEN can stand on hotspot
+}
+
+function tryMove(dx,dy){
+  if(!$(" #s-map")?.classList.contains("active") && !$("#s-map")?.classList.contains("active")) return;
+  if(!$("#s-map").classList.contains("active")) return;
+  const nx = player.x + dx, ny = player.y + dy;
+  if(!isWalkable(nx,ny)){ beep([200]); return; }
+  player.x = nx; player.y = ny;
+  if(dx) player.facing = dx>0?1:-1;
+  const p = $("#player");
+  if(p){ p.classList.add("walk"); clearTimeout(p._t); p._t=setTimeout(()=>p.classList.remove("walk"),180); }
+  SFX.soft();
+  placePlayer();
+  updateHotspots();
+  const h = hotspotAt(player.x, player.y) || hotspotNear(player.x, player.y);
+  if(h){
+    if(h.type==="shelf" && h.id) say(`附近有 ${ITEMS[h.id].name}。㩒「互動」攞入籃。`,"neutral");
+    else if(h.type==="counter") say("到櫃檯啦。㩒「互動」或者「去櫃檯」。","neutral");
+  }
+}
+
+function shelfIndexAt(x,y){
+  return SHELF_SLOTS.findIndex(s=>s.x===x && s.y===y);
+}
+
+function hotspotAt(x,y){
+  const si = shelfIndexAt(x,y);
+  if(si>=0) return {type:"shelf", index:si, id:shelfItems[si]||null, x,y};
+  if(x===COUNTER_POS.x && y===COUNTER_POS.y) return {type:"counter", x,y};
+  return null;
+}
+
+function hotspotNear(x,y){
+  // 吸邊：四向鄰格
+  const dirs=[[0,0],[1,0],[-1,0],[0,1],[0,-1]];
+  for(const [dx,dy] of dirs){
+    const h = hotspotAt(x+dx,y+dy);
+    if(h && (h.type==="counter" || h.id)) return h;
+  }
+  return null;
+}
+
+function updateHotspots(){
+  // clear bangs
+  $$(".map-cell .bang").forEach(b=>b.remove());
+  $$(".map-cell.hot").forEach(c=>c.classList.remove("hot"));
+  // paint shelves
+  SHELF_SLOTS.forEach((s,i)=>{
+    const cell = mapCells[s.y]?.[s.x];
+    if(!cell) return;
+    const id = shelfItems[i];
+    cell.classList.toggle("taken", !id);
+    // wipe old emo text except bang
+    cell.querySelectorAll(".emo").forEach(e=>e.remove());
+    if(id){
+      const sp=document.createElement("span");
+      sp.className="emo";
+      sp.textContent = ITEMS[id].emo;
+      cell.appendChild(sp);
+    }else{
+      cell.insertAdjacentHTML("beforeend",'<span class="emo">📦</span>');
+    }
+  });
+  // counter label
+  const cc = mapCells[COUNTER_POS.y]?.[COUNTER_POS.x];
+  if(cc && !cc.querySelector(".emo")){
+    const sp=document.createElement("span");
+    sp.className="emo"; sp.textContent="💰";
+    cc.appendChild(sp);
+  }
+  // bang on near hotspot
+  const h = hotspotNear(player.x, player.y);
+  if(h){
+    const cell = mapCells[h.y]?.[h.x];
+    if(cell){
+      cell.classList.add("hot");
+      if(!cell.querySelector(".bang")){
+        const b=document.createElement("span");
+        b.className="bang"; b.textContent="！";
+        cell.appendChild(b);
+      }
+    }
+  }
+  // interact button label
+  const btn = $("#btnInteract");
+  if(btn){
+    if(h?.type==="shelf" && h.id) btn.innerHTML = `<span class="ico">🛒</span> 攞 ${ITEMS[h.id].name}`;
+    else if(h?.type==="shelf") btn.innerHTML = `<span class="ico">📦</span> 空貨架`;
+    else if(h?.type==="counter") btn.innerHTML = `<span class="ico">💰</span> 去結帳`;
+    else btn.innerHTML = `<span class="ico">✨</span> 互動`;
+  }
+}
+
+function renderMap(){
+  if(!mapReady) buildMapGrid();
+  const L = LISTS[state.listIndex];
+  const ids = L.items.concat(L.shelf);
+  // assign up to shelf slots
+  shelfItems = SHELF_SLOTS.map((_,i)=> ids[i] || null);
+  player.x = 5; player.y = 6;
+  renderListStrip();
+  placePlayer();
+  updateHotspots();
+  renderBasket();
+  say("歡迎光臨 PIXEL MART！睇住清單，行去貨架攞嘢，再去櫃檯付足錢。","happy");
+}
+
+function pickItemFromMap(id, shelfIndex){
+  if(!id){ say("呢度已經攞咗喇。","think"); return; }
   if(state.basket.length >= CONFIG.maxBasket){
-    // 中性提示：講容量，唔講「你攞錯」
-    beep([300]); el.classList.add("jiggle");
-    say("籃度已經裝滿晒喇。", "think");
-    return;
+    beep([300]); say("籃度已經裝滿晒喇。","think"); return;
+  }
+  if(state.basket.includes(id)){
+    // allow? original disabled tile after pick - each item once
+    say("呢樣已經喺籃度喇。","think"); return;
   }
   state.basket.push(id);
+  shelfItems[shelfIndex] = null;
   SFX.tap();
-  el.classList.add("flying");
-  setTimeout(()=>{ el.disabled = true; el.classList.remove("flying"); }, 480);
   renderBasket();
+  updateHotspots();
   const n = state.basket.length;
-  say(n===1 ? "攞咗一樣嘢。" : `而家籃度有 ${n} 樣嘢。`, "neutral");
+  say(n===1 ? `攞咗 ${ITEMS[id].name}。` : `攞咗 ${ITEMS[id].name}。籃度有 ${n} 樣。`,"neutral");
+}
+
+function doInteract(){
+  if(!$("#s-map").classList.contains("active")) return;
+  const h = hotspotNear(player.x, player.y);
+  if(!h){ say("行近貨架或者櫃檯，先可以互動。","think"); beep([240]); return; }
+  if(h.type==="shelf"){
+    if(!h.id){ say("空貨架。","think"); return; }
+    pickItemFromMap(h.id, h.index);
+    return;
+  }
+  if(h.type==="counter"){
+    goToCheckout();
+  }
+}
+
+function goToCheckout(){
+  SFX.tap();
+  state.cursor = 0;
+  if(state.basket.length === 0){
+    say("籃度乜都冇喎。咁你攞嘅嘢，同清單一樣嗎？","think");
+    go("declare");
+    return;
+  }
+  renderCheck(); go("check");
+  say("好，我哋核對清單。","neutral");
+}
+
+function onMapCellTap(x,y){
+  if(!$("#s-map").classList.contains("active")) return;
+  // tap adjacent or self to step toward / interact
+  const dx = Math.sign(x - player.x), dy = Math.sign(y - player.y);
+  if(x===player.x && y===player.y){ doInteract(); return; }
+  // one step toward
+  if(Math.abs(x-player.x)+Math.abs(y-player.y)===1){
+    tryMove(x-player.x, y-player.y);
+    // if landed on hotspot auto-prompt
+    return;
+  }
+  // multi-step: step once toward
+  if(dx && isWalkable(player.x+dx, player.y)) tryMove(dx,0);
+  else if(dy && isWalkable(player.x, player.y+dy)) tryMove(0,dy);
+  else beep([200]);
+}
+
+function renderShop(){ renderMap(); } // alias
+
+function pickItem(id, el){
+  // legacy no-op path
+  const idx = shelfItems.indexOf(id);
+  if(idx>=0) pickItemFromMap(id, idx);
 }
 
 function renderBasket(){
@@ -1259,7 +1587,7 @@ function startList(){
   armDeclare(); armPay();
   $("#rewardStar").style.display = "none";
   const rv = $("#resultValue"); if(rv){ rv.hidden = true; rv.textContent = ""; }
-  renderBasket(); renderShop(); go("shop");
+  renderBasket(); renderMap(); go("map");
 }
 
 function resetAll(){
@@ -1346,16 +1674,14 @@ $("#btnStart").addEventListener("click", ()=>{ SFX.tap(); renderDoor(); go("door
 $("#btnHas").addEventListener("click", ()=>answerCheck("has"));
 $("#btnNo").addEventListener("click",  ()=>answerCheck("no"));
 
-$("#btnToCheck").addEventListener("click", ()=>{
-  SFX.tap();
-  state.cursor = 0;
-  if(state.basket.length === 0){
-    say("籃度乜都冇喎。咁你攞嘅嘢，同清單一樣嗎？", "think");
-    go("declare");
-    return;
-  }
-  renderCheck(); go("check");
-});
+$("#btnToCheck").addEventListener("click", ()=>goToCheckout());
+$("#btnGoCounter").addEventListener("click", ()=>goToCheckout());
+$("#btnInteract").addEventListener("click", ()=>{ SFX.tap(); doInteract(); });
+$("#padUp").addEventListener("click", ()=>tryMove(0,-1));
+$("#padDown").addEventListener("click", ()=>tryMove(0,1));
+$("#padLeft").addEventListener("click", ()=>tryMove(-1,0));
+$("#padRight").addEventListener("click", ()=>tryMove(1,0));
+$("#padAct").addEventListener("click", ()=>{ SFX.tap(); doInteract(); });
 
 $("#btnCheckDone").addEventListener("click", ()=>{ SFX.tap(); onCheckTapDone(); });
 
@@ -1416,12 +1742,16 @@ $("#btnClear").addEventListener("click", ()=>{
 
 document.addEventListener("keydown", (e)=>{
   if(e.key === "Escape"){ $("#teacherPanel").classList.remove("show"); return; }
-  // ⚠ 輸入框內唔好觸發快捷鍵。
-  //   Bug：證書畫面打「Timothy」「Tony」呢類名時，每撳一個 t
-  //   就會彈出老師面板（position:fixed; inset:0 完全遮住證書），
-  //   而個 t 又照樣入咗個欄 —— 名打歪咗，畫面仲俾個面板擋住。
   const t = e.target;
   if(t && t.closest && t.closest("input, textarea, select, [contenteditable]")) return;
+  // 地圖移動
+  if($("#s-map") && $("#s-map").classList.contains("active")){
+    if(e.key==="ArrowUp" || e.key==="w" || e.key==="W"){ e.preventDefault(); tryMove(0,-1); return; }
+    if(e.key==="ArrowDown" || e.key==="s" || e.key==="S"){ e.preventDefault(); tryMove(0,1); return; }
+    if(e.key==="ArrowLeft" || e.key==="a" || e.key==="A"){ e.preventDefault(); tryMove(-1,0); return; }
+    if(e.key==="ArrowRight" || e.key==="d" || e.key==="D"){ e.preventDefault(); tryMove(1,0); return; }
+    if(e.key===" " || e.key==="Enter" || e.key==="e" || e.key==="E"){ e.preventDefault(); doInteract(); return; }
+  }
   if(e.key === "t" || e.key === "T"){
     if(!$("#teacherPanel").classList.contains("show")) openTeacher();
   }
@@ -1435,7 +1765,7 @@ document.addEventListener("pointerdown", ()=>{
 
 /* 啟動：每次開頁都係全新一節，唔會帶住上一個學生嘅進度 */
 renderStars(); renderBasket();
-say("你好！呢度係無人商店——攞咗嘢都要付足錢。", "happy");
+say("PIXEL MART！行入無人超市，攞嘢記得付足錢。", "happy");
 go("cover");
 </script>
 </body>
