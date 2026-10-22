@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BUILD:pixel-mart-v15-1b80fc4 -->
+<!-- BUILD:pixel-mart-shape-v1 -->
 <html lang="zh-HK">
 <head>
 <meta charset="UTF-8">
@@ -556,6 +556,66 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
   color:var(--hud); font-weight:800; font-size:clamp(.9rem,2.2vw,1.1rem);
   text-align:center; margin:0;
 }
+/* ── 封面：模式選擇 ── */
+.mode-pick{ display:flex; flex-wrap:wrap; gap:18px; justify-content:center; }
+.mode-btn{
+  flex-direction:column; gap:2px; min-height:158px;
+  padding:14px 22px; min-width:min(230px,42vw);
+}
+.mode-tag{
+  align-self:flex-start;
+  background:var(--line); color:var(--paper);
+  font-size:.78rem; padding:3px 10px; letter-spacing:.12em; margin-bottom:2px;
+}
+.mode-ico{ font-size:1.9rem; line-height:1.1; }
+.mode-name{ font-size:clamp(1.1rem,3.2vw,1.45rem); }
+.mode-sub{ font-size:.78rem; font-weight:700; letter-spacing:0; opacity:.85; }
+
+/* ── 數量標記 ×3（只喺中學模式出現）
+   唔可以用 --pixel-hi：嗰隻係為深色底調嘅，放喺米色卡／深色格都唔夠 contrast。
+   跟住底色走：--ink（淺底）或者直接變白（深底）。 ── */
+.qt{
+  font-size:.62em; font-weight:900; letter-spacing:0;
+  margin-left:1px; vertical-align:middle;
+}
+.mini .qt, .ls-dot .qt, .dot .qt{ color:var(--ink); }
+#bottombar .qt{ color:var(--ink); }
+
+/* ── 中學：數字配對面板 ── */
+#qtyPanel{
+  position:fixed; inset:0; z-index:60;
+  background:rgba(13,14,22,.8);
+  display:grid; place-items:center; padding:16px;
+}
+#qtyPanel[hidden]{ display:none; }
+#qtyBox{
+  background:var(--card); border:4px solid var(--line);
+  box-shadow:8px 8px 0 var(--line); border-radius:0;
+  padding:18px 16px; width:min(520px,94vw); max-height:92vh; overflow-y:auto;
+  display:flex; flex-direction:column; align-items:center; gap:12px;
+  text-align:center;
+}
+#qtyTitle{ margin:0; font-size:clamp(1.15rem,3.4vw,1.6rem); color:var(--ink); }
+#qtyItems{
+  display:flex; flex-wrap:wrap; gap:6px; justify-content:center; align-content:center;
+  background:var(--bg); border:3px solid var(--line);
+  padding:10px; min-height:78px; width:100%;
+}
+#qtyItems .qi{ font-size:1.9rem; line-height:1; }
+#qtyHint{ margin:0; font-weight:800; font-size:.95rem; color:var(--ink-soft); }
+#qtyHint.good{ color:var(--pixel-hi); }
+#qtyKeys{ display:grid; grid-template-columns:repeat(5,1fr); gap:8px; width:100%; }
+.qkey{
+  min-height:56px; font-size:1.3rem; font-weight:900; font-family:inherit;
+  border:3px solid var(--line); border-radius:0;
+  background:var(--paper); color:var(--ink);
+  box-shadow:4px 4px 0 var(--line); cursor:pointer;
+}
+.qkey:active{ transform:translate(2px,2px); box-shadow:2px 2px 0 var(--line); }
+.qkey.bad{ background:#E8443A; color:var(--paper); box-shadow:4px 4px 0 #7A1C18; }
+.qkey.good{ background:#4E8C4A; color:var(--paper); box-shadow:4px 4px 0 #2C5730; }
+#btnQtyCancel{ font-size:1rem; min-height:52px; }
+
 /* ── 矮視窗（筆電、分屏、投影機 16:10）──
    「清單常駐」係教學紅線：清單一被捲出畫面，學生就唔知要攞咩。
    所以喺高度唔夠嘅螢幕，寧願壓細方向掣都要保住頂部清單。 */
@@ -601,14 +661,31 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
       </div>
       <h2 class="screen-h">PIXEL MART</h2>
       <p class="hint">無人商店：冇人睇住，都要<strong>付足錢</strong>。<br>自己對清楚，再老實講。</p>
-      <button class="big primary" id="btnStart" type="button">
-        <span class="ico">🚪</span> PRESS START
-      </button>
+      <div class="mode-pick" role="group" aria-label="選擇學習模式">
+        <button class="big primary mode-btn" id="btnModePrimary" type="button">
+          <span class="mode-tag">小學</span>
+          <span class="mode-ico">🚪</span>
+          <span class="mode-name">誠信劇場</span>
+          <span class="mode-sub">對清楚 · 老實付足</span>
+        </button>
+        <button class="big alt mode-btn" id="btnModeSecondary" type="button">
+          <span class="mode-tag">中學·數</span>
+          <span class="mode-ico">🔢</span>
+          <span class="mode-name">數字配對</span>
+          <span class="mode-sub">數數 · 數量配對</span>
+        </button>
+        <button class="big alt mode-btn" id="btnModeShape" type="button">
+          <span class="mode-tag">中學·形</span>
+          <span class="mode-ico">▲●■</span>
+          <span class="mode-name">形狀購物</span>
+          <span class="mode-sub">跟形 · 唔好手多多</span>
+        </button>
+      </div>
     </section>
 
     <!-- ── 畫面 1：門口（揀清單） ─────────────────── -->
     <section class="screen" id="s-door">
-      <h2 class="screen-h">今日有 3 張購物清單</h2>
+      <h2 class="screen-h" id="doorH">今日有 3 張購物清單</h2>
       <p class="hint">㩒一張開始</p>
       <div class="lists" id="doorLists"></div>
     </section>
@@ -646,6 +723,19 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
       <!-- 隱藏兼容：舊 shelf 容器畀 tools 唔爆 -->
       <div id="shelf" hidden></div>
       <button id="btnToCheck" type="button" hidden>核對</button>
+
+      <!-- ── 中學模式：數字配對面板（1-10 數字掣）─────────
+           學生要自己數架上有幾多件，然後㩒返個數。
+           答錯唔懲罰、可以再試 —— 呢個係練習，唔係評核。 -->
+      <div id="qtyPanel" hidden role="dialog" aria-modal="true" aria-labelledby="qtyTitle">
+        <div id="qtyBox">
+          <h3 id="qtyTitle">架上有幾多件？</h3>
+          <div id="qtyItems" aria-hidden="true"></div>
+          <p id="qtyHint">數一數，然後㩒返個數</p>
+          <div id="qtyKeys" role="group" aria-label="選擇件數 1 至 10"></div>
+          <button class="big ghost" id="btnQtyCancel" type="button">取消</button>
+        </div>
+      </div>
     </section>
 
     <!-- ── 畫面 3：核對枱（逐項自己核對） ─────────── -->
@@ -810,32 +900,157 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
 /* ============================================================
    資料層 — 換成插圖只需要改 ITEMS 一個 map（見 docs/02）
    ============================================================ */
+const SHAPE_MARK = { circle:"●", triangle:"▲", square:"■", rect:"▬" };
+const SHAPE_NAME = { circle:"圓形", triangle:"三角形", square:"正方形", rect:"長方形" };
+
 const ITEMS = {
-  apple:   {emo:"🍎", name:"蘋果"},
-  milk:    {emo:"🥛", name:"牛奶"},
-  cookie:  {emo:"🍪", name:"餅乾"},
-  banana:  {emo:"🍌", name:"香蕉"},
-  choco:   {emo:"🍫", name:"朱古力"},
-  bread:   {emo:"🍞", name:"麵包"},
-  grape:   {emo:"🍇", name:"葡萄"},
-  corn:    {emo:"🌽", name:"粟米"},
-  cheese:  {emo:"🧀", name:"芝士"},
-  juicebox:{emo:"🧃", name:"果汁盒"},
-  melon:   {emo:"🍉", name:"西瓜"},
-  pear:    {emo:"🍐", name:"梨"},
-  egg:     {emo:"🥚", name:"雞蛋"},
-  orange:  {emo:"🍊", name:"橙"},
-  chips:   {emo:"🍟", name:"薯片"},
+  apple:   {emo:"🍎", name:"蘋果",   shape:"circle"},
+  milk:    {emo:"🥛", name:"牛奶",   shape:"rect"},
+  cookie:  {emo:"🍪", name:"餅乾",   shape:"circle"},
+  banana:  {emo:"🍌", name:"香蕉",   shape:"rect"},
+  choco:   {emo:"🍫", name:"朱古力", shape:"rect"},
+  bread:   {emo:"🍞", name:"麵包",   shape:"square"},
+  grape:   {emo:"🍇", name:"葡萄",   shape:"circle"},
+  corn:    {emo:"🌽", name:"粟米",   shape:"triangle"},
+  cheese:  {emo:"🧀", name:"芝士",   shape:"triangle"},
+  juicebox:{emo:"🧃", name:"果汁盒", shape:"rect"},
+  melon:   {emo:"🍉", name:"西瓜",   shape:"circle"},
+  pear:    {emo:"🍐", name:"梨",     shape:"triangle"},
+  egg:     {emo:"🥚", name:"雞蛋",   shape:"circle"},
+  orange:  {emo:"🍊", name:"橙",     shape:"circle"},
+  chips:   {emo:"🍟", name:"薯片",   shape:"rect"},
+  /* 形狀購物專用實物（每件獨立一格，judge 用 shape 計數） */
+  c1:{emo:"🍪", name:"圓餅A",   shape:"circle"},
+  c2:{emo:"🍩", name:"圓餅B",   shape:"circle"},
+  c3:{emo:"🔴", name:"圓盒",     shape:"circle"},
+  c4:{emo:"⚪", name:"圓碟",     shape:"circle"},
+  t1:{emo:"🍰", name:"三角蛋糕", shape:"triangle"},
+  t2:{emo:"🍕", name:"三角批",   shape:"triangle"},
+  t3:{emo:"🔺", name:"三角積木", shape:"triangle"},
+  s1:{emo:"📦", name:"正方紙巾", shape:"square"},
+  s2:{emo:"🧊", name:"正方盒",   shape:"square"},
+  s3:{emo:"🎁", name:"正方禮盒", shape:"square"},
+  s4:{emo:"🟫", name:"正方磚",   shape:"square"},
+  r1:{emo:"🧃", name:"長方果汁", shape:"rect"},
+  r2:{emo:"📟", name:"長方盒",   shape:"rect"},
 };
 
-/* 三張清單：items = 清單上要取的；shelf = 額外干擾項（唔喺清單）
-   設計規則：每張單 3 清單 + 3 干擾 = 貨架 6 件，3+3 兩行。
-   同一畫面唔好出現外型相近嘅一對（例：紙盒飲品 vs 杯飲品）。*/
-const LISTS = [
+/* 三張清單：items = 清單上要取的；shelf = 額外干擾項 */
+const LISTS_PRIMARY = [
   { items:["apple","milk","cookie"],   shelf:["banana","bread","egg"] },
   { items:["banana","choco","bread"],  shelf:["apple","cheese","chips"] },
   { items:["grape","corn","cheese"],   shelf:["banana","juicebox","pear"] },
 ];
+
+/* ── 中學·數字配對：items {id,qty} ── */
+const LISTS_SECONDARY = [
+  { items:[{id:"apple",  qty:3},{id:"milk",   qty:2},{id:"cookie", qty:5}],
+    shelf:["banana","bread","egg"] },
+  { items:[{id:"banana", qty:4},{id:"choco",  qty:2},{id:"bread",  qty:6}],
+    shelf:["apple","cheese","chips"] },
+  { items:[{id:"grape",  qty:2},{id:"corn",   qty:7},{id:"cheese", qty:3}],
+    shelf:["banana","juicebox","pear"] },
+];
+
+/* ── 中學·形狀購物定案：數1–5；●▲■入單；▬干擾；供≥需+餘 ──
+   銀=跟單；金=跟單+比足。形錯≠不誠實。 */
+const LISTS_SHAPE = [
+  {
+    level:"中",
+    shapes:[{shape:"circle",qty:2},{shape:"triangle",qty:1},{shape:"square",qty:2}],
+    shelf:["c1","c2","c3","t1","t2","s1","s2","s3","r1"],
+  },
+  {
+    level:"高",
+    shapes:[{shape:"circle",qty:2},{shape:"triangle",qty:1},{shape:"square",qty:1}],
+    shelf:["c1","c2","c3","t1","t2","s1","r1","r2"],
+  },
+];
+
+const MODES = {
+  primary:   { key:"primary",   label:"小學",     sub:"對清楚 · 老實付足", ico:"🚪", lists:LISTS_PRIMARY,   qty:false, shape:false },
+  secondary: { key:"secondary", label:"中學·數",  sub:"數數 · 數字配對",    ico:"🔢", lists:LISTS_SECONDARY, qty:true,  shape:false },
+  shape:     { key:"shape",     label:"中學·形",  sub:"跟形 · 唔好手多多", ico:"▲●■", lists:LISTS_SHAPE,     qty:false, shape:true  },
+};
+
+let LISTS = LISTS_PRIMARY;
+
+function setMode(m){
+  const M = MODES[m] ? m : "primary";
+  state.mode = M;
+  LISTS = MODES[M].lists;
+  state.listIndex = 0;
+  state.basket = []; state.basketN = {}; state.checks = []; state.cursor = 0;
+  state.declared = false; state.declareAns = null;
+  state.paid = false; state.payChoice = null;
+  state.silvers = 0;
+  CONFIG.maxBasket = isShapeMode() ? 9 : 6;
+}
+function isQtyMode(){ return !!(MODES[state.mode] && MODES[state.mode].qty); }
+function isShapeMode(){ return !!(MODES[state.mode] && MODES[state.mode].shape); }
+function curList(){ return LISTS[state.listIndex]; }
+function listIds(list){
+  if(list.shapes) return list.shapes.map(s => s.shape);
+  return list.items.map(i => typeof i === "string" ? i : i.id);
+}
+function shelfIds(list){ return list.shelf.map(i => typeof i === "string" ? i : i.id); }
+function listQty(list, id){
+  if(isShapeMode() && list.shapes){
+    const e = list.shapes.find(s => s.shape === id);
+    return e ? e.qty : 0;
+  }
+  if(!isQtyMode()) return 1;
+  const e = list.items.find(i => (typeof i === "string" ? i : i.id) === id);
+  return (e && typeof e === "object" && e.qty) ? e.qty : 1;
+}
+function qtyTag(list, id){
+  if(isShapeMode() && list.shapes){
+    const q = listQty(list, id);
+    return q ? "×"+q : "";
+  }
+  if(!isQtyMode()) return "";
+  const q = listQty(list, id);
+  return q > 1 ? "×"+q : "";
+}
+function nameQty(list, id){
+  if(isShapeMode() && SHAPE_NAME[id]){
+    const q = listQty(list, id);
+    return (SHAPE_MARK[id]||"") + SHAPE_NAME[id] + (q ? "×"+q : "");
+  }
+  return ITEMS[id].name + qtyTag(list, id);
+}
+function shapeOf(id){ return (ITEMS[id] && ITEMS[id].shape) || null; }
+function basketShapeCounts(){
+  const got = {circle:0, triangle:0, square:0, rect:0};
+  state.basket.forEach(id=>{
+    const sh = shapeOf(id);
+    if(!sh) return;
+    got[sh] = (got[sh]||0) + (state.basketN[id] || 1);
+  });
+  return got;
+}
+function needShapeCounts(list){
+  const need = {circle:0, triangle:0, square:0, rect:0};
+  if(list.shapes) list.shapes.forEach(s=>{ need[s.shape] = s.qty; });
+  return need;
+}
+function shapeMatchInfo(list){
+  const need = needShapeCounts(list);
+  const got = basketShapeCounts();
+  const keys = ["circle","triangle","square"];
+  let mathOk = true;
+  const missing = [], extraShapes = [];
+  keys.forEach(k=>{
+    if((got[k]||0) !== (need[k]||0)){
+      mathOk = false;
+      if((got[k]||0) < (need[k]||0)) missing.push(k);
+      if((got[k]||0) > (need[k]||0)) extraShapes.push(k);
+    }
+  });
+  if((got.rect||0) > 0){ mathOk = false; if(!extraShapes.includes("rect")) extraShapes.push("rect"); }
+  const tookExtra = extraShapes.length > 0;
+  return { need, got, mathOk, missing, extraShapes, tookExtra };
+}
 
 /* 可調參數（老師/developer 喺 console 改都得） */
 const CONFIG = {
@@ -849,11 +1064,14 @@ const CONFIG = {
    狀態
    ============================================================ */
 const state = {
+  mode      : "primary", // 小學 / 中學·數 / 中學·形
   listIndex : 0,
-  basket    : [],
+  basket    : [],   // 已攞嘅貨 id（每種一件 entry）
+  basketN   : {},   // id → 件數（小學模式永遠 = 1）
   checks    : [],   // {item, said:'has'|'no', right:bool}
   cursor    : 0,    // 核對到第幾件
-  stars     : 0,    // 只獎「比足錢」
+  stars     : 0,    // 金：形狀=跟單+比足；其他=比足
+  silvers   : 0,    // 銀：形狀跟單
   log       : [],   // 每張單一筆
   declared  : false, // 本單已答「一樣／唔一樣」
   declareAns: null,  // 'same' | 'diff'
@@ -1027,15 +1245,28 @@ function renderStars(popLast=false){
    ============================================================ */
 function renderDoor(){
   const wrap = $("#doorLists"); wrap.innerHTML = "";
+  const dh = $("#doorH");
+  if(dh){
+    dh.textContent = isShapeMode()
+      ? `今日有 ${LISTS.length} 張形狀購物清單`
+      : `今日有 ${LISTS.length} 張購物清單`;
+  }
   LISTS.forEach((L,i)=>{
     const done = i < state.listIndex;
     const b = document.createElement("button");
     b.type = "button";
     b.className = "list-card" + (done ? " done" : "");
-    b.innerHTML =
-      `<span class="idx">第 ${i+1} 單</span>` +
-      L.items.map(id=>`<span class="row"><span class="dot">${ITEMS[id].emo}</span></span>`).join("") +
-      (done ? `<span class="tick">✅</span>` : "");
+    const level = L.level ? `<span class="idx">${L.level} · 第 ${i+1} 單</span>` : `<span class="idx">第 ${i+1} 單</span>`;
+    let rows;
+    if(isShapeMode() && L.shapes){
+      rows = L.shapes.map(s=>`<span class="row"><span class="dot">${SHAPE_MARK[s.shape]}<span class="qt">×${s.qty}</span></span></span>`).join("");
+    }else{
+      rows = listIds(L).map(id=>`<span class="row"><span class="dot">${ITEMS[id].emo}<span class="qt">${qtyTag(L,id)}</span></span></span>`).join("");
+    }
+    b.innerHTML = level + rows + (done ? `<span class="tick">✅</span>` : "");
+    b.setAttribute("aria-label", isShapeMode()
+      ? `第 ${i+1} 單：${(L.shapes||[]).map(s=>SHAPE_NAME[s.shape]+s.qty).join("、")}`
+      : `第 ${i+1} 單：${listIds(L).map(id=>nameQty(L,id)).join("、")}`);
     b.addEventListener("click", ()=>{
       if(done){ beep([220]); say("呢張單做完咗㗎喇，㩒下一張啦"); return; }
       SFX.tap(); state.listIndex = i; startList();
@@ -1062,7 +1293,7 @@ const MAP_LAYOUT = [
   "#.........#",
   "#.S.S.S...#",
   "#.........#",
-  "#.........#",
+  "#.S.S.S...#",
   "#....C....#",
   "###########",
 ];
@@ -1071,7 +1302,7 @@ const COUNTER_POS = {x:5,y:7};
 let mapCells = []; // [y][x] -> div
 let shelfItems = []; // parallel to SHELF_SLOTS: item id or null if taken
 const DIR_DOWN = 0, DIR_UP = 1, DIR_LEFT = 2, DIR_RIGHT = 3;
-let player = {x:5, y:6, facing:DIR_DOWN};
+let player = {x:5, y:5, facing:DIR_DOWN};
 let mapReady = false;
 let walkQueue = [];   // 自動行路剩低嘅步
 let walkFrame = 0;    // 0 = 站立, 1/2 = 擺腿
@@ -1348,16 +1579,27 @@ function pathTo(tx,ty){
 }
 
 function renderListStrip(){
-  const L = LISTS[state.listIndex];
+  const L = curList();
   const strip = $("#listStripItems");
   if(!strip) return;
   strip.innerHTML = "";
-  L.items.forEach(id=>{
+  if(isShapeMode() && L.shapes){
+    L.shapes.forEach(s=>{
+      const d = document.createElement("div");
+      d.className = "ls-dot";
+      d.innerHTML = `${SHAPE_MARK[s.shape]}<span class="qt">×${s.qty}</span>`;
+      d.setAttribute("role","img");
+      d.setAttribute("aria-label", `${SHAPE_NAME[s.shape]} ${s.qty} 個`);
+      strip.appendChild(d);
+    });
+    return;
+  }
+  listIds(L).forEach(id=>{
     const d = document.createElement("div");
     d.className = "ls-dot";
-    d.textContent = ITEMS[id].emo;
+    d.innerHTML = `${ITEMS[id].emo}<span class="qt">${qtyTag(L,id)}</span>`;
     d.setAttribute("role","img");
-    d.setAttribute("aria-label", ITEMS[id].name);
+    d.setAttribute("aria-label", nameQty(L,id));
     strip.appendChild(d);
   });
 }
@@ -1423,7 +1665,12 @@ function stepPlayer(dx,dy,quiet){
   if(!quiet){
     const h = hotspotAt(player.x, player.y) || hotspotNear(player.x, player.y);
     if(h){
-      if(h.type==="shelf" && h.id) say(`附近有 ${ITEMS[h.id].name}。㩒「互動」攞入籃。`,"neutral");
+      if(h.type==="shelf" && h.id){
+      const sh = shapeOf(h.id);
+      say(isShapeMode() && sh
+        ? `附近有 ${SHAPE_MARK[sh]}${SHAPE_NAME[sh]}。㩒「互動」攞入籃。`
+        : `附近有 ${ITEMS[h.id].name}。㩒「互動」攞入籃。`, "neutral");
+    }
       else if(h.type==="counter") say("到櫃檯啦。㩒「互動」或者「去櫃檯」。","neutral");
     }
   }
@@ -1483,7 +1730,11 @@ function updateHotspots(){
   // interact button label
   const btn = $("#btnInteract");
   if(btn){
-    if(h?.type==="shelf" && h.id) btn.innerHTML = `<span class="ico">🛒</span> 攞 ${ITEMS[h.id].name}`;
+    if(h?.type==="shelf" && h.id){
+      const sh = shapeOf(h.id);
+      const lab = (isShapeMode() && sh) ? `${SHAPE_MARK[sh]}${SHAPE_NAME[sh]}` : ITEMS[h.id].name;
+      btn.innerHTML = `<span class="ico">🛒</span> 攞 ${lab}`;
+    }
     else if(h?.type==="shelf") btn.innerHTML = `<span class="ico">📦</span> 空貨架`;
     else if(h?.type==="counter") btn.innerHTML = `<span class="ico">💰</span> 去結帳`;
     else btn.innerHTML = `<span class="ico">✨</span> 互動`;
@@ -1493,49 +1744,140 @@ function updateHotspots(){
 
 function renderMap(){
   if(!mapReady) buildMapGrid();
-  const L = LISTS[state.listIndex];
-  const ids = L.items.concat(L.shelf);
+  const L = curList();
+  const ids = listIds(L).concat(shelfIds(L));
   // assign up to shelf slots
   shelfItems = SHELF_SLOTS.map((_,i)=> ids[i] || null);
-  player.x = 5; player.y = 6; player.facing = DIR_DOWN;
+  player.x = 5; player.y = 5; player.facing = DIR_DOWN;
   walkQueue.length = 0; walking = false; walkFrame = 0;
   renderListStrip();
   placePlayer();
   updateHotspots();
   renderBasket();
   startMapLoop();
-  say("歡迎光臨 PIXEL MART！睇住清單，行去貨架攞嘢，再去櫃檯付足錢。","happy");
+  say(isShapeMode()
+    ? "形狀購物！睇住 ●▲■ 要幾多，行去貨架揀啱形，唔好手多多。"
+    : isQtyMode()
+    ? "歡迎光臨 PIXEL MART！睇住清單上面嘅數量，行去貨架數清楚件數先攞。"
+    : "歡迎光臨 PIXEL MART！睇住清單，行去貨架攞嘢，再去櫃檯付足錢。", "happy");
 }
 
-function pickItemFromMap(id, shelfIndex){
+/* 籃度記錄：basket 存 id（每種一件 entry），basketN 存件數 */
+function pickItemFromMap(id, shelfIndex, n){
   if(!id){ say("呢度已經攞咗喇。","think"); return; }
-  if(state.basket.length >= CONFIG.maxBasket){
+  if(!state.basket.includes(id) && state.basket.length >= CONFIG.maxBasket){
     beep([300]); say("籃度已經裝滿晒喇。","think"); return;
   }
-  if(state.basket.includes(id)){
-    // allow? original disabled tile after pick - each item once
-    say("呢樣已經喺籃度喇。","think"); return;
-  }
-  state.basket.push(id);
+  const q = (n && n > 1) ? n : 1;
+  if(!state.basket.includes(id)) state.basket.push(id);
+  state.basketN[id] = q;
   shelfItems[shelfIndex] = null;
   SFX.tap();
   renderBasket();
   updateHotspots();
-  const n = state.basket.length;
-  say(n===1 ? `攞咗 ${ITEMS[id].name}。` : `攞咗 ${ITEMS[id].name}。籃度有 ${n} 樣。`,"neutral");
+  const n2 = state.basket.length;
+  let qtyTxt;
+  if(isShapeMode()){
+    const sh = shapeOf(id);
+    qtyTxt = `${ITEMS[id].emo}${SHAPE_MARK[sh]||""}`;
+  }else{
+    qtyTxt = (q > 1) ? `${ITEMS[id].name} ${q} 件` : ITEMS[id].name;
+  }
+  say(n2===1 ? `攞咗 ${qtyTxt}。` : `攞咗 ${qtyTxt}。籃度有 ${n2} 樣。`, "neutral");
 }
 
 function doInteract(){
   if(!onMapScreen()) return;
+  if(!$("#qtyPanel").hidden) return;      // 數字配對面板開咗，唔准行去第二樣
   const h = hotspotNear(player.x, player.y);
   if(!h){ say("行近貨架或者櫃檯，先可以互動。","think"); beep([240]); return; }
   if(h.type==="shelf"){
     if(!h.id){ say("空貨架。","think"); return; }
+    // 中學模式：開數字配對面板，學生要自己數件數
+    if(isQtyMode()){ openQtyPanel(h.id, h.index); return; }
     pickItemFromMap(h.id, h.index);
     return;
   }
   if(h.type==="counter"){
     goToCheckout();
+  }
+}
+
+/* ============================================================
+   中學模式：數字配對（1-10 數字掣）
+   ────────────────────────────────────────────────────────────
+   設計界線（重要）：
+   • 呢關只練「數件數 / 認數字」，**唔係評核** → 答錯唔扣分、可以再試
+   • 呢關嘅對錯唔會影響星星：星星仍然只獎「比足錢」（教學紅線）
+   • 答啱先交貨：確保籃度件數一定啱，數量錯誤只可能來自「誠實答」嗰步，
+     唔會因為數錯而被系統自動修正，誠實嘅學習意義先保住
+   ============================================================ */
+const QTY_MAX = 10;
+let qtyCtx = null;   // {id, shelfIndex, want}
+
+function openQtyPanel(id, shelfIndex){
+  const L = curList();
+  const onList = listIds(L).includes(id);
+  const want = onList ? listQty(L, id) : 1;   // 干擾項一樣可以用數字掣
+  qtyCtx = { id, shelfIndex, want, onList };
+
+  $("#qtyTitle").textContent = onList
+    ? `架上有幾多件${ITEMS[id].name}？`
+    : `架上有幾多件${ITEMS[id].name}？`;
+  const hint = $("#qtyHint");
+  hint.classList.remove("good");
+  hint.textContent = "數一數，然後㩒返個數";
+
+  const box = $("#qtyItems");
+  box.innerHTML = "";
+  for(let i=0;i<want;i++){
+    const s = document.createElement("span");
+    s.className = "qi";
+    s.textContent = ITEMS[id].emo;
+    box.appendChild(s);
+  }
+
+  const keys = $("#qtyKeys");
+  keys.innerHTML = "";
+  for(let n=1;n<=QTY_MAX;n++){
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "qkey";
+    b.textContent = String(n);
+    b.setAttribute("aria-label", `${n} 件`);
+    b.addEventListener("click", ()=>answerQty(n, b));
+    keys.appendChild(b);
+  }
+  $("#qtyPanel").hidden = false;
+  SFX.tap();
+  lockInput();
+}
+
+function closeQtyPanel(){
+  $("#qtyPanel").hidden = true;
+  qtyCtx = null;
+}
+
+function answerQty(n, btn){
+  if(!qtyCtx) return;
+  if(n === qtyCtx.want){
+    btn.classList.add("good");
+    SFX.star();
+    const hint = $("#qtyHint");
+    hint.classList.add("good");
+    hint.textContent = `啱！${qtyCtx.want} 件${ITEMS[qtyCtx.id].name}`;
+    say(`啱！架上有 ${qtyCtx.want} 件${ITEMS[qtyCtx.id].name}。`, "happy");
+    const ctx = qtyCtx;
+    setTimeout(()=>{ closeQtyPanel(); pickItemFromMap(ctx.id, ctx.shelfIndex, ctx.want); }, 750);
+  }else{
+    // 練習模式：只話「再數一次」，唔會話你答案錯咗邊度
+    btn.classList.add("bad");
+    beep([240]);
+    const hint = $("#qtyHint");
+    hint.classList.remove("good");
+    hint.textContent = "再數一次，數吓有幾多件。";
+    say("再數一次，慢慢數。", "think");
+    setTimeout(()=>btn.classList.remove("bad"), 500);
   }
 }
 
@@ -1581,12 +1923,34 @@ function pickItem(id, el){
 }
 
 function renderBasket(){
+  const L = curList();
   const box = $("#basketItems"); box.innerHTML = "";
   state.basket.forEach(id=>{
-    const s = document.createElement("span"); s.textContent = ITEMS[id].emo; box.appendChild(s);
+    const n = state.basketN[id] || 1;
+    const s = document.createElement("span");
+    const sh = shapeOf(id);
+    if(isShapeMode() && sh){
+      s.innerHTML = `${ITEMS[id].emo}<span class="qt">${SHAPE_MARK[sh]}</span>`;
+      s.setAttribute("aria-label", `${SHAPE_NAME[sh]} ${ITEMS[id].name}`);
+    }else{
+      s.innerHTML = `${ITEMS[id].emo}<span class="qt">${(isQtyMode() && n>1) ? "×"+n : ""}</span>`;
+      s.setAttribute("aria-label", `${ITEMS[id].name} ${n} 件`);
+    }
+    s.setAttribute("role","img");
+    box.appendChild(s);
   });
   const n = state.basket.length;
-  $("#basketCap").textContent = n ? `籃度有 ${n} 樣嘢` : "籃度未有嘢";
+  if(isShapeMode()){
+    const g = basketShapeCounts();
+    const parts = [];
+    if(g.circle) parts.push("●"+g.circle);
+    if(g.triangle) parts.push("▲"+g.triangle);
+    if(g.square) parts.push("■"+g.square);
+    if(g.rect) parts.push("▬"+g.rect);
+    $("#basketCap").textContent = parts.length ? ("籃：" + parts.join(" ")) : "籃度未有嘢";
+  }else{
+    $("#basketCap").textContent = n ? `籃度有 ${n} 樣嘢` : "籃度未有嘢";
+  }
 }
 
 /* ============================================================
@@ -1595,19 +1959,30 @@ function renderBasket(){
      對錯只在畫面 4 學生自己誠實回答之後才反應。
    ============================================================ */
 function renderCheck(){
-  const L = LISTS[state.listIndex];
-  const wanted = L.items;
+  const L = curList();
+  const wanted = listIds(L);
 
   // 左：清單
   const cl = $("#checkList"); cl.innerHTML = "";
-  wanted.forEach(id=>{
-    const d = document.createElement("div");
-    d.className = "mini"; d.textContent = ITEMS[id].emo;
-    // div 加 aria-label 而唔加 role 會被 AT 忽略 → 要 role="img"
-    d.setAttribute("role", "img");
-    d.setAttribute("aria-label", ITEMS[id].name);
-    cl.appendChild(d);
-  });
+  if(isShapeMode() && L.shapes){
+    L.shapes.forEach(s=>{
+      const d = document.createElement("div");
+      d.className = "mini";
+      d.innerHTML = `${SHAPE_MARK[s.shape]}<span class="qt">×${s.qty}</span>`;
+      d.setAttribute("role", "img");
+      d.setAttribute("aria-label", `${SHAPE_NAME[s.shape]} ${s.qty} 個`);
+      cl.appendChild(d);
+    });
+  }else{
+    wanted.forEach(id=>{
+      const d = document.createElement("div");
+      d.className = "mini";
+      d.innerHTML = `${ITEMS[id].emo}<span class="qt">${qtyTag(L,id)}</span>`;
+      d.setAttribute("role", "img");
+      d.setAttribute("aria-label", nameQty(L, id));
+      cl.appendChild(d);
+    });
+  }
 
   // 右：籃
   const cb = $("#checkBasket"); cb.innerHTML = "";
@@ -1617,11 +1992,18 @@ function renderCheck(){
     cb.appendChild(d);
   } else {
     state.basket.forEach((id,i)=>{
+      const n = state.basketN[id] || 1;
       const b = document.createElement("button");
       b.type = "button";
       b.className = "mini small" + (i < state.cursor ? " done" : "");
-      b.textContent = ITEMS[id].emo;
-      b.setAttribute("aria-label", ITEMS[id].name);
+      const sh = shapeOf(id);
+      if(isShapeMode() && sh){
+        b.innerHTML = `${ITEMS[id].emo}<span class="qt">${SHAPE_MARK[sh]}</span>`;
+        b.setAttribute("aria-label", `${SHAPE_NAME[sh]}`);
+      }else{
+        b.innerHTML = `${ITEMS[id].emo}<span class="qt">${(isQtyMode() && n>1) ? "×"+n : ""}</span>`;
+        b.setAttribute("aria-label", `${ITEMS[id].name} ${n} 件`);
+      }
       b.addEventListener("click", ()=>onCheckTap(i));
       cb.appendChild(b);
     });
@@ -1662,7 +2044,11 @@ function onCheckTap(i){
   $("#zoom").classList.add("show");
   $("#checkCtl").style.display = "";
   $("#btnCheckDone").style.display = "none";
-  say("呢個嘢，清單上面有冇？", "think");
+  say(isShapeMode()
+    ? "呢個係咩形？清單要唔要呢個形？"
+    : isQtyMode()
+    ? `呢個嘢，清單上面要幾多件？數吓你攞咗幾多件。`
+    : "呢個嘢，清單上面有冇？", "think");
   SFX.tap();
 }
 
@@ -1670,7 +2056,15 @@ function answerCheck(said){
   const id = state.basket[state.cursor];
   if(id === undefined) return;
   lockInput();   // 呢度會原地換走有／冇掣 → 必須 arm 閘門（見 lockInput 註解）
-  const right = LISTS[state.listIndex].items.includes(id) === (said === "has");
+  let right;
+  if(isShapeMode()){
+    const sh = shapeOf(id);
+    const need = needShapeCounts(curList());
+    const onList = !!(sh && (need[sh]||0) > 0);
+    right = onList === (said === "has");
+  }else{
+    right = listIds(curList()).includes(id) === (said === "has");
+  }
   state.checks.push({ item:id, said, right });
   SFX.soft();
   state.cursor++;
@@ -1700,30 +2094,69 @@ function onCheckTapDone(){ /* 直接跳去誠實確認（＝付足錢） */
    畫面 4：誠實確認 → 畫面 5：結果
    ============================================================ */
 function judge(){
-  const L = LISTS[state.listIndex];
-  const wanted = L.items;
+  const L = curList();
+  if(isShapeMode()){
+    const info = shapeMatchInfo(L);
+    return {
+      allMatch : info.mathOk,
+      got   : state.basket.length,
+      want  : (L.shapes||[]).reduce((a,s)=>a+s.qty,0),
+      wantN : info.need,
+      gotN  : info.got,
+      missing : info.missing,
+      extra : info.extraShapes,
+      tookExtra : info.tookExtra,
+      shapeMode : true,
+    };
+  }
+  const wanted = listIds(L);
   const actual = state.basket;
-  const allMatch = wanted.length === wanted.filter(w=>actual.includes(w)).length
-                   && actual.length === wanted.length;
+  const wantN = {}; wanted.forEach(id => wantN[id] = listQty(L, id));
+  const gotN  = {}; actual.forEach(id => gotN[id]  = state.basketN[id] || 1);
+  const missing = wanted.filter(id => (gotN[id] || 0) !== wantN[id]);
+  const extra   = actual.filter(id => !wanted.includes(id));
   return {
-    allMatch,
-    got: actual.length,
-    want: wanted.length,
-    // 攞漏咗嘅 / 多咗嘅（學生已誠實答覆之後先講，係教學位，唔算洩漏）
-    missing: wanted.filter(w=>!actual.includes(w)),
-    extra:   actual.filter(a=>!wanted.includes(a)),
+    allMatch : missing.length === 0 && extra.length === 0,
+    got   : actual.length,
+    want  : wanted.length,
+    wantN, gotN,
+    missing, extra,
+    tookExtra : extra.length > 0,
+    shapeMode : false,
   };
 }
 
-/* 講清楚差在邊：漏咗咩、多咗咩（結果先講；唔暗示即刻改籃） */
+/* 講清楚差在邊：漏咗咩、多咗咩、件數差幾多（結果先講；唔暗示即刻改籃） */
 function diffSentence(r){
-  const n = (ids)=> ids.map(i=>ITEMS[i].name).join("、");
+  if(r.shapeMode){
+    const nm = (k)=> `${SHAPE_MARK[k]||""}${SHAPE_NAME[k]||k}（要 ${r.wantN[k]||0}，攞 ${r.gotN[k]||0}）`;
+    const nx = (k)=> `${SHAPE_MARK[k]||""}${SHAPE_NAME[k]||k}（多咗）`;
+    if(r.missing.length && r.extra.length)
+      return r.missing.map(nm).join("、") + "；" + r.extra.map(nx).join("、") + "。";
+    if(r.missing.length) return r.missing.map(nm).join("、") + "。";
+    if(r.extra.length) return "多咗 " + r.extra.map(nx).join("、") + "。";
+    return "形同數量都跟單。";
+  }
+  if(!isQtyMode()){
+    const n = (ids)=> ids.map(i=>ITEMS[i].name).join("、");
+    if(r.missing.length && r.extra.length)
+      return `漏咗 ${n(r.missing)}，多咗 ${n(r.extra)}。`;
+    if(r.missing.length)
+      return `漏咗 ${n(r.missing)}。`;
+    if(r.extra.length)
+      return `多咗 ${n(r.extra)}。`;
+    return "同清單一樣。";
+  }
+  const nmWant  = (id)=> `${ITEMS[id].name}（要 ${r.wantN[id]} 件，攞咗 ${r.gotN[id] || 0} 件）`;
+  // extra（干擾項）根本唔喺清單，r.wantN[id] 係 undefined，
+  // 所以呢支一定要用自己嘅講法，唔可以 reuse nmWant。
+  const nmExtra = (id)=> `${ITEMS[id].name}（清單冇呢樣，攞咗 ${r.gotN[id] || 0} 件）`;
   if(r.missing.length && r.extra.length)
-    return `漏咗 ${n(r.missing)}，多咗 ${n(r.extra)}。`;
+    return `${r.missing.map(nmWant).join("、")} 唔啱，多咗 ${r.extra.map(nmExtra).join("、")}。`;
   if(r.missing.length)
-    return `漏咗 ${n(r.missing)}。`;
+    return `${r.missing.map(nmWant).join("、")} 唔啱。`;
   if(r.extra.length)
-    return `多咗 ${n(r.extra)}。`;
+    return `多咗 ${r.extra.map(nmExtra).join("、")}。`;
   return "同清單一樣。";
 }
 
@@ -1752,28 +2185,65 @@ function pay(choice){
   const truthful = (state.declareAns==="same") === r.allMatch;
   const paidFull = choice === "full";
 
+  const L = curList();
+  const listLabel = isShapeMode()
+    ? (L.shapes||[]).map(s=>`${SHAPE_MARK[s.shape]}×${s.qty}`).join(" ")
+    : listIds(L).map(id=>nameQty(L,id)).join("、");
+  const gotLabel = isShapeMode()
+    ? state.basket.map(id=>{
+        const sh = shapeOf(id);
+        return `${ITEMS[id].emo}${SHAPE_MARK[sh]||""}`;
+      }).join(" ") || "（空籃）"
+    : state.basket.map(id=>`${ITEMS[id].name}${(isQtyMode() && (state.basketN[id]||1)>1) ? ` ${state.basketN[id]} 件` : ""}`).join("、") || "（空籃）";
+  const missLabel = isShapeMode()
+    ? r.missing.map(k=>`${SHAPE_MARK[k]}${SHAPE_NAME[k]}（要${r.wantN[k]}攞${r.gotN[k]||0}）`).join("、") || "—"
+    : r.missing.map(id=>isQtyMode() ? `${ITEMS[id].name}（要 ${r.wantN[id]}，攞咗 ${r.gotN[id]||0}）` : ITEMS[id].name).join("、") || "—";
+  const extraLabel = isShapeMode()
+    ? r.extra.map(k=>`${SHAPE_MARK[k]}${SHAPE_NAME[k]}`).join("、") || "—"
+    : r.extra.map(id=>ITEMS[id].name).join("、") || "—";
+
+  // 形狀：銀=跟單；金=跟單+比足。其他模式：星=比足（原規則）
+  let award = "none";
+  if(isShapeMode()){
+    if(r.allMatch) state.silvers++;
+    if(r.allMatch && paidFull){ award = "gold"; state.stars++; }
+    else if(r.allMatch) award = "silver";
+  }else if(paidFull){
+    award = "gold"; state.stars++;
+  }
+
   state.log.push({
+    模式: MODES[state.mode].label,
     第: state.listIndex+1,
-    清單: LISTS[state.listIndex].items.map(i=>ITEMS[i].name).join("、"),
-    攞到: state.basket.map(i=>ITEMS[i].name).join("、") || "（空籃）",
-    漏咗: r.missing.map(i=>ITEMS[i].name).join("、") || "—",
-    多咗: r.extra.map(i=>ITEMS[i].name).join("、") || "—",
+    清單: listLabel,
+    攞到: gotLabel,
+    漏咗: missLabel,
+    多咗: extraLabel,
+    形狀跟單: isShapeMode() ? (r.allMatch ? "✓ 跟單" : "✗ 未跟單") : "—",
+    多取: isShapeMode() ? (r.tookExtra ? "✓ 有多取/干擾" : "無多取") : "—",
     逐項核對: state.checks.length
-      ? state.checks.map(c=>`${ITEMS[c.item].name}:${c.said==="has"?"有":"冇"}${c.right?"✓":"✗"}`).join(" ")
+      ? state.checks.map(c=>{
+          const lab = isShapeMode() ? `${ITEMS[c.item].emo}${SHAPE_MARK[shapeOf(c.item)]||""}` : ITEMS[c.item].name;
+          return `${lab}:${c.said==="has"?"有":"冇"}${c.right?"✓":"✗"}`;
+        }).join(" ")
       : "（略過逐項核對）",
     誠實答覆: state.declareAns==="same" ? "一樣" : "唔一樣",
     實際: r.allMatch ? "一樣" : "唔一樣",
     一致: truthful ? "✓ 對貨誠實" : "✗ 對貨有落差",
     付費: PAY_LABEL[choice] || choice,
     付足: paidFull ? "✓ 付足" : "✗ 未付足",
+    獎: award === "gold" ? "⭐金" : award === "silver" ? "🥈銀" : "—",
   });
 
-  // 星只獎「比足錢」
-  if(paidFull){
+  if(award === "gold"){
     SFX.star();
-    state.stars++;
     renderStars(true);
     $("#rewardStar").style.display = "block";
+    $("#rewardStar").textContent = "⭐";
+  }else if(award === "silver"){
+    SFX.soft();
+    $("#rewardStar").style.display = "block";
+    $("#rewardStar").textContent = "🥈";
   }else{
     SFX.soft();
     $("#rewardStar").style.display = "none";
@@ -1793,9 +2263,13 @@ function paintResult(){
   const t = $("#resultTitle"), b = $("#resultBody"), v = $("#resultValue");
   const d = diffSentence(r);
 
-  // 貨（事實，短）
+  // 貨（事實，短）—— 形狀模式：形/數錯 = 數學，唔標不誠實
   let goods;
-  if(ans==="diff" && !r.allMatch){
+  if(r.shapeMode){
+    if(r.allMatch) goods = "形：跟單啱晒（形+數）。";
+    else goods = "形：" + d + "（呢個係形狀／數量，下次再對。）";
+    if(r.tookExtra) goods += " 有多取／多咗干擾。";
+  }else if(ans==="diff" && !r.allMatch){
     goods = "貨：你老實講——唔一樣。" + d;
   }else if(ans==="diff" && r.allMatch){
     goods = "貨：你話唔一樣；再對原來一樣。你好小心。";
@@ -1808,11 +2282,25 @@ function paintResult(){
   // 錢 + 價值觀（主教學）
   let money, title, face, voice, value, teach=false;
   if(choice==="full"){
-    title = "你有誠信！";
-    money = "錢：你付足咗。";
-    value = "無人商店冇人睇住，你都照付清。\n自己攞嘅，自己付足——呢個就係誠信。";
-    face = "thanks";
-    voice = "你有誠信！冇人睇住都照付足。";
+    if(r.shapeMode && r.allMatch){
+      title = "金星！跟單又付足";
+      money = "錢：你付足咗。";
+      value = "形狀跟單 + 無人店付足。\n忍住手唔多取，又自己付清——金星！";
+      face = "thanks";
+      voice = "金星！形狀啱，又付足錢。";
+    }else if(r.shapeMode && !r.allMatch){
+      title = "你有付足";
+      money = "錢：你付足咗。";
+      value = "付足有誠信。\n形狀／數量下次再對清楚。形錯唔等於唔誠實。";
+      face = "happy";
+      voice = "付足喇。形狀下次再對。";
+    }else{
+      title = "你有誠信！";
+      money = "錢：你付足咗。";
+      value = "無人商店冇人睇住，你都照付清。\n自己攞嘅，自己付足——呢個就係誠信。";
+      face = "thanks";
+      voice = "你有誠信！冇人睇住都照付足。";
+    }
     t.style.color = "var(--ok)";
   }else if(choice==="less"){
     title = "記得要付足";
@@ -1858,21 +2346,24 @@ function armPay(){
 }
 
 function startList(){
-  state.basket = []; state.checks = []; state.cursor = 0;
+  state.basket = []; state.basketN = {}; state.checks = []; state.cursor = 0;
   armDeclare(); armPay();
-  $("#rewardStar").style.display = "none";
+  $("#rewardStar").style.display = "none"; $("#rewardStar").textContent = "⭐";
   const rv = $("#resultValue"); if(rv){ rv.hidden = true; rv.textContent = ""; }
   renderBasket(); renderMap(); go("map");
 }
 
 function resetAll(){
-  state.listIndex = 0; state.stars = 0; state.log = [];
-  state.basket = []; state.checks = []; state.cursor = 0;
+  state.listIndex = 0; state.stars = 0; state.silvers = 0; state.log = [];
+  state.basket = []; state.basketN = {}; state.checks = []; state.cursor = 0;
+  state.declared = false; state.declareAns = null;
+  state.paid = false; state.payChoice = null;
   armDeclare(); armPay();
   $("#rewardStar").style.display = "none";
   renderStars(); renderBasket();
   $("#nameInput").value = "";
   $("#certName").textContent = "\u00a0";
+  closeQtyPanel();
   go("cover");
 }
 
@@ -1885,7 +2376,15 @@ function nextList(){
       : "（今次未有付足星）";
     $("#certName").textContent = $("#nameInput").value.trim() || " ";
     go("cert");
-    if(state.stars >= LISTS.length){
+    if(isShapeMode()){
+      if(state.stars >= LISTS.length){
+        say("金星全中！跟單又付足，好叻！", "thanks");
+      }else if(state.silvers > 0 || state.stars > 0){
+        say(`跟單 ${state.silvers} 次，金星 ${state.stars} 次。記住：唔好手多多，又要付足。`, "happy");
+      }else{
+        say("下次跟 ●▲■ 數量，忍住手，再付足。", "think");
+      }
+    }else if(state.stars >= LISTS.length){
       say("你今日每次都付足，好有誠信！收埋工啦！", "thanks");
     }else if(state.stars > 0){
       say(`你今日付足咗 ${state.stars} 次。記得：無人店要付足！`, "happy");
@@ -1904,7 +2403,7 @@ function nextList(){
    ============================================================ */
 function teacherText(){
   const lines = [
-    "無人商店 · 誠信小任務 — 老師記錄",
+    `無人商店 · 誠信小任務 — 老師記錄（${MODES[state.mode].label}模式）`,
     "日期：" + new Date().toLocaleDateString("zh-HK"),
     "星 = 比足錢次數（對貨誠實另欄）",
     "",
@@ -1915,6 +2414,7 @@ function teacherText(){
       `第 ${r.第} 單｜清單：${r.清單}`,
       `  攞到：${r.攞到}`,
       `  漏咗：${r.漏咗}｜多咗：${r.多咗}`,
+      `  形狀跟單：${r.形狀跟單||"—"}｜多取：${r.多取||"—"}｜獎：${r.獎||"—"}`,
       `  逐項核對：${r.逐項核對}`,
       `  對貨：答「${r.誠實答覆}」｜實際「${r.實際}」｜${r.一致}`,
       `  付費：${r.付費}｜${r.付足}`,
@@ -1943,8 +2443,24 @@ function openTeacher(){ $("#teacherOut").textContent = teacherText();
 /* ============================================================
    事件
    ============================================================ */
-$("#btnStart").addEventListener("click", ()=>{ SFX.tap(); renderDoor(); go("door");
-  say(`無人商店：攞完要自己對，再付足錢。今日 ${LISTS.length} 張單！`, "happy"); });
+function startMode(m){
+  SFX.tap();
+  setMode(m);
+  renderStars();
+  renderDoor(); go("door");
+  const msg = m === "shape"
+    ? `形狀購物：跟 ●▲■ 數量，唔好手多多。銀=跟單，金=跟單+付足。今日 ${LISTS.length} 張！`
+    : m === "secondary"
+    ? `中學數字：睇清清單每樣要幾多件，行去貨架數清楚件數先攞。今日 ${LISTS.length} 張單！`
+    : `無人商店：攞完要自己對，再付足錢。今日 ${LISTS.length} 張單！`;
+  say(msg, "happy");
+}
+$("#btnModePrimary").addEventListener("click", ()=>startMode("primary"));
+$("#btnModeSecondary").addEventListener("click", ()=>startMode("secondary"));
+$("#btnModeShape").addEventListener("click", ()=>startMode("shape"));
+$("#btnQtyCancel").addEventListener("click", ()=>{
+  SFX.tap(); closeQtyPanel(); say("冇問題，慢慢數。","neutral");
+});
 
 $("#btnHas").addEventListener("click", ()=>answerCheck("has"));
 $("#btnNo").addEventListener("click",  ()=>answerCheck("no"));
@@ -2016,6 +2532,11 @@ $("#btnClear").addEventListener("click", ()=>{
 });
 
 document.addEventListener("keydown", (e)=>{
+  // 數字配對面板開住時：Esc 收埋佢，而且唔准地圖鍵盤漏入去
+  if(!$("#qtyPanel").hidden){
+    if(e.key === "Escape"){ closeQtyPanel(); }
+    return;
+  }
   if(e.key === "Escape"){ $("#teacherPanel").classList.remove("show"); return; }
   const t = e.target;
   if(t && t.closest && t.closest("input, textarea, select, [contenteditable]")) return;
