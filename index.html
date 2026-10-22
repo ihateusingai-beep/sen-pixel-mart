@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BUILD:pixel-mart-shape-v1b -->
+<!-- BUILD:pixel-mart-shape-v2-realgoods -->
 <html lang="zh-HK">
 <head>
 <meta charset="UTF-8">
@@ -354,6 +354,21 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
 }
 #zoom.show{display:flex;}
 #zoom .big-emo{font-size:clamp(2.6rem,8vw,4.6rem); line-height:1;}
+.item-pic{
+  width:2.6rem; height:2.6rem; object-fit:contain; vertical-align:middle;
+  image-rendering:auto; background:#fff; border:2px solid var(--ink);
+  border-radius:6px;
+}
+.item-pic.lg{ width:clamp(3.2rem,12vw,5rem); height:clamp(3.2rem,12vw,5rem); border-width:3px; }
+.ls-dot .item-pic{ width:2.4rem; height:2.4rem; }
+.mini .item-pic{ width:2.8rem; height:2.8rem; }
+#bottombar .item-pic{ width:2.2rem; height:2.2rem; border-width:1.5px; }
+.shape-badge{
+  display:inline-block; min-width:1.1em; text-align:center;
+  font-weight:900; font-size:.85em; margin-left:2px;
+}
+.list-card .dot .item-pic{ width:2.5rem; height:2.5rem; }
+
 #zoom .zoom-cap{font-size:clamp(.95rem,2.2vw,1.2rem); font-weight:800; color:var(--ink-soft);}
 #s-check .big{min-height:84px; min-width:min(180px,38vw); font-size:clamp(1.2rem,3vw,1.7rem);
   padding:12px 16px;}
@@ -919,21 +934,22 @@ const ITEMS = {
   egg:     {emo:"🥚", name:"雞蛋",   shape:"circle"},
   orange:  {emo:"🍊", name:"橙",     shape:"circle"},
   chips:   {emo:"🍟", name:"薯片",   shape:"rect"},
-  /* 形狀購物專用實物（每件獨立一格，judge 用 shape 計數） */
-  c1:{emo:"🍪", name:"圓餅A",   shape:"circle"},
-  c2:{emo:"🍩", name:"圓餅B",   shape:"circle"},
-  c3:{emo:"🔴", name:"圓盒",     shape:"circle"},
-  c4:{emo:"⚪", name:"圓碟",     shape:"circle"},
-  t1:{emo:"🍰", name:"三角蛋糕", shape:"triangle"},
-  t2:{emo:"🍕", name:"三角批",   shape:"triangle"},
-  t3:{emo:"🔺", name:"三角積木", shape:"triangle"},
-  s1:{emo:"📦", name:"正方紙巾", shape:"square"},
-  s2:{emo:"🧊", name:"正方盒",   shape:"square"},
-  s3:{emo:"🎁", name:"正方禮盒", shape:"square"},
-  s4:{emo:"🟫", name:"正方磚",   shape:"square"},
-  r1:{emo:"🧃", name:"長方果汁", shape:"rect"},
-  r2:{emo:"📟", name:"長方盒",   shape:"rect"},
+  /* 形狀購物：超市真實包裝（白底圖）；judge 用 shape 計數 */
+  c1:{emo:"🍪", name:"圓形餅乾盒",   shape:"circle",   img:"assets/shape/c1-cookie-tin.jpg"},
+  c2:{emo:"🍪", name:"圓形曲奇罐",   shape:"circle",   img:"assets/shape/c2-biscuit-box.jpg"},
+  c3:{emo:"🍮", name:"圓形布甸杯",   shape:"circle",   img:"assets/shape/c3-pudding-cup.jpg"},
+  t1:{emo:"🍰", name:"三角形蛋糕盒", shape:"triangle", img:"assets/shape/t1-cake-box.jpg"},
+  t2:{emo:"🍙", name:"三角形飯糰",   shape:"triangle", img:"assets/shape/t2-onigiri.jpg"},
+  s1:{emo:"🧻", name:"正方形紙巾盒", shape:"square",   img:"assets/shape/s1-tissue-box.jpg"},
+  s2:{emo:"🍫", name:"正方形朱古力盒", shape:"square", img:"assets/shape/s2-choco-box.jpg"},
+  s3:{emo:"🧈", name:"正方形豆腐盒", shape:"square",   img:"assets/shape/s3-tofu.jpg"},
+  r1:{emo:"🧃", name:"長方形果汁盒", shape:"rect",     img:"assets/shape/r1-juice.jpg"},
+  r2:{emo:"🥛", name:"長方形牛奶盒", shape:"rect",     img:"assets/shape/r2-milk.jpg"},
 };
+
+/* 形狀清單展示用代表圖（需求係 shape×qty，唔綁死某一件） */
+const SHAPE_REP = { circle:"c1", triangle:"t1", square:"s1", rect:"r1" };
+
 
 /* 三張清單：items = 清單上要取的；shelf = 額外干擾項 */
 const LISTS_PRIMARY = [
@@ -1020,6 +1036,39 @@ function nameQty(list, id){
   return ITEMS[id].name + qtyTag(list, id);
 }
 function shapeOf(id){ return (ITEMS[id] && ITEMS[id].shape) || null; }
+function itemImg(id){ return (ITEMS[id] && ITEMS[id].img) || ""; }
+function itemPicHTML(id, cls){
+  if(!id || !ITEMS[id]) return "";
+  const src = itemImg(id);
+  const sh = shapeOf(id);
+  const badge = sh ? `<span class="shape-badge" aria-hidden="true">${SHAPE_MARK[sh]||""}</span>` : "";
+  if(src){
+    return `<img class="item-pic ${cls||""}" src="${src}" alt="${ITEMS[id].name}" loading="eager">${badge}`;
+  }
+  return `<span>${ITEMS[id].emo||""}</span>${badge}`;
+}
+function shapeNeedPicHTML(shape, qty){
+  const rep = SHAPE_REP[shape];
+  const src = rep && itemImg(rep);
+  const mark = SHAPE_MARK[shape]||"";
+  if(src){
+    return `<img class="item-pic" src="${src}" alt="${SHAPE_NAME[shape]||""}" loading="eager"><span class="qt">×${qty}</span><span class="shape-badge">${mark}</span>`;
+  }
+  return `${mark}<span class="qt">×${qty}</span>`;
+}
+/* canvas 貨圖 cache */
+const _imgCache = {};
+function preloadItemImages(){
+  Object.keys(ITEMS).forEach(id=>{
+    const src = itemImg(id);
+    if(!src || _imgCache[src]) return;
+    const im = new Image();
+    im.decoding = "async";
+    im.src = src;
+    _imgCache[src] = im;
+  });
+}
+
 function basketShapeCounts(){
   const got = {circle:0, triangle:0, square:0, rect:0};
   state.basket.forEach(id=>{
@@ -1259,7 +1308,7 @@ function renderDoor(){
     const level = L.level ? `<span class="idx">${L.level} · 第 ${i+1} 單</span>` : `<span class="idx">第 ${i+1} 單</span>`;
     let rows;
     if(isShapeMode() && L.shapes){
-      rows = L.shapes.map(s=>`<span class="row"><span class="dot">${SHAPE_MARK[s.shape]}<span class="qt">×${s.qty}</span></span></span>`).join("");
+      rows = L.shapes.map(s=>`<span class="row"><span class="dot">${shapeNeedPicHTML(s.shape,s.qty)}</span></span>`).join("");
     }else{
       rows = listIds(L).map(id=>`<span class="row"><span class="dot">${ITEMS[id].emo}<span class="qt">${qtyTag(L,id)}</span></span></span>`).join("");
     }
@@ -1480,12 +1529,37 @@ function drawBang(ctx){
 /* 貨架上面嘅嘢用 emoji 畫：特教學生靠樣認嘢，
    唔好用抽象 pixel 圖案取代（會失去辨識度）。 */
 function drawItemEmoji(ctx,id,tx,ty){
-  if(!id) return;
+  if(!id || !ITEMS[id]) return;
+  const x = tx*TILE, y = ty*TILE;
+  const src = itemImg(id);
+  const im = src ? _imgCache[src] : null;
   ctx.save();
-  ctx.font = `13px ${EMOJI_FONT}`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(ITEMS[id].emo, tx*TILE + TILE/2, ty*TILE + 7);
+  if(im && im.complete && im.naturalWidth){
+    // 白底小框 + 貨圖（清晰輪廓）
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(x+1, y+1, TILE-2, TILE-3);
+    ctx.strokeStyle = PAL.k;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x+1, y+1, TILE-2, TILE-3);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(im, x+2, y+2, TILE-4, TILE-5);
+    // 角標形
+    const sh = shapeOf(id);
+    if(sh){
+      ctx.font = "bold 7px sans-serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "top";
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(x+TILE-8, y+1, 7, 8);
+      ctx.fillStyle = PAL.k;
+      ctx.fillText(SHAPE_MARK[sh]||"", x+TILE-2, y+1);
+    }
+  }else{
+    ctx.font = `13px ${EMOJI_FONT}`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(ITEMS[id].emo, x + TILE/2, y + 7);
+  }
   ctx.restore();
 }
 
@@ -1587,7 +1661,7 @@ function renderListStrip(){
     L.shapes.forEach(s=>{
       const d = document.createElement("div");
       d.className = "ls-dot";
-      d.innerHTML = `${SHAPE_MARK[s.shape]}<span class="qt">×${s.qty}</span>`;
+      d.innerHTML = shapeNeedPicHTML(s.shape, s.qty);
       d.setAttribute("role","img");
       d.setAttribute("aria-label", `${SHAPE_NAME[s.shape]} ${s.qty} 個`);
       strip.appendChild(d);
@@ -1668,7 +1742,7 @@ function stepPlayer(dx,dy,quiet){
       if(h.type==="shelf" && h.id){
       const sh = shapeOf(h.id);
       say(isShapeMode() && sh
-        ? `附近有 ${SHAPE_MARK[sh]}${SHAPE_NAME[sh]}。㩒「互動」攞入籃。`
+        ? `附近有 ${ITEMS[h.id].name}（${SHAPE_NAME[sh]}）。㩒「互動」攞入籃。`
         : `附近有 ${ITEMS[h.id].name}。㩒「互動」攞入籃。`, "neutral");
     }
       else if(h.type==="counter") say("到櫃檯啦。㩒「互動」或者「去櫃檯」。","neutral");
@@ -1732,7 +1806,7 @@ function updateHotspots(){
   if(btn){
     if(h?.type==="shelf" && h.id){
       const sh = shapeOf(h.id);
-      const lab = (isShapeMode() && sh) ? `${SHAPE_MARK[sh]}${SHAPE_NAME[sh]}` : ITEMS[h.id].name;
+      const lab = ITEMS[h.id].name;
       btn.innerHTML = `<span class="ico">🛒</span> 攞 ${lab}`;
     }
     else if(h?.type==="shelf") btn.innerHTML = `<span class="ico">📦</span> 空貨架`;
@@ -1779,7 +1853,7 @@ function pickItemFromMap(id, shelfIndex, n){
   let qtyTxt;
   if(isShapeMode()){
     const sh = shapeOf(id);
-    qtyTxt = `${ITEMS[id].emo}${SHAPE_MARK[sh]||""}`;
+    qtyTxt = `${ITEMS[id].name}${SHAPE_MARK[sh]||""}`;
   }else{
     qtyTxt = (q > 1) ? `${ITEMS[id].name} ${q} 件` : ITEMS[id].name;
   }
@@ -1930,8 +2004,8 @@ function renderBasket(){
     const s = document.createElement("span");
     const sh = shapeOf(id);
     if(isShapeMode() && sh){
-      s.innerHTML = `${ITEMS[id].emo}<span class="qt">${SHAPE_MARK[sh]}</span>`;
-      s.setAttribute("aria-label", `${SHAPE_NAME[sh]} ${ITEMS[id].name}`);
+      s.innerHTML = itemPicHTML(id);
+      s.setAttribute("aria-label", ITEMS[id].name);
     }else{
       s.innerHTML = `${ITEMS[id].emo}<span class="qt">${(isQtyMode() && n>1) ? "×"+n : ""}</span>`;
       s.setAttribute("aria-label", `${ITEMS[id].name} ${n} 件`);
@@ -1968,7 +2042,7 @@ function renderCheck(){
     L.shapes.forEach(s=>{
       const d = document.createElement("div");
       d.className = "mini";
-      d.innerHTML = `${SHAPE_MARK[s.shape]}<span class="qt">×${s.qty}</span>`;
+      d.innerHTML = shapeNeedPicHTML(s.shape, s.qty);
       d.setAttribute("role", "img");
       d.setAttribute("aria-label", `${SHAPE_NAME[s.shape]} ${s.qty} 個`);
       cl.appendChild(d);
@@ -1998,8 +2072,8 @@ function renderCheck(){
       b.className = "mini small" + (i < state.cursor ? " done" : "");
       const sh = shapeOf(id);
       if(isShapeMode() && sh){
-        b.innerHTML = `${ITEMS[id].emo}<span class="qt">${SHAPE_MARK[sh]}</span>`;
-        b.setAttribute("aria-label", `${SHAPE_NAME[sh]}`);
+        b.innerHTML = itemPicHTML(id);
+        b.setAttribute("aria-label", ITEMS[id].name);
       }else{
         b.innerHTML = `${ITEMS[id].emo}<span class="qt">${(isQtyMode() && n>1) ? "×"+n : ""}</span>`;
         b.setAttribute("aria-label", `${ITEMS[id].name} ${n} 件`);
@@ -2040,7 +2114,12 @@ function onCheckTap(i){
   if(i >= state.basket.length || i < state.cursor) return;
   state.cursor = i;
   const id = state.basket[i];
-  $("#zoomEmo").textContent = ITEMS[id].emo;
+  const z = $("#zoomEmo");
+  if(isShapeMode() && itemImg(id)){
+    z.innerHTML = itemPicHTML(id, "lg");
+  }else{
+    z.textContent = ITEMS[id].emo;
+  }
   $("#zoom").classList.add("show");
   $("#checkCtl").style.display = "";
   $("#btnCheckDone").style.display = "none";
@@ -2560,6 +2639,13 @@ document.addEventListener("pointerdown", ()=>{
 }, {once:true});
 
 /* 啟動：每次開頁都係全新一節，唔會帶住上一個學生嘅進度 */
+preloadItemImages();
+// 貨圖載入後重畫地圖（避免 shelf 空白）
+Object.values(_imgCache).forEach(im=>{
+  if(!im) return;
+  const kick = ()=>{ if(onMapScreen()) drawMap(); };
+  if(im.complete) kick(); else { im.addEventListener("load", kick); im.addEventListener("error", kick); }
+});
 renderStars(); renderBasket();
 say("PIXEL MART！行入無人超市，攞嘢記得付足錢。", "happy");
 go("cover");
