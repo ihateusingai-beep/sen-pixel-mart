@@ -1000,6 +1000,9 @@ function setMode(m){
   state.declared = false; state.declareAns = null;
   state.paid = false; state.payChoice = null;
   state.silvers = 0;
+  /* 星都清埋：切 mode 等於開新一節，唔應該帶住上一個學生／上一個 mode 嘅星星。
+     （現實路徑上 resetAll() 已經清過，但呢行係防未來加新入口時漏清。）*/
+  state.stars = 0; state.log = [];
   CONFIG.maxBasket = isShapeMode() ? 9 : 6;
 }
 function isQtyMode(){ return !!(MODES[state.mode] && MODES[state.mode].qty); }
@@ -1788,7 +1791,9 @@ function updateHotspots(){
     const id = shelfItems[i];
     if(id){
       cell.classList.add("hot-target");
-      cell.setAttribute("aria-label", `貨架：${ITEMS[id].name}`);
+      // 防禦：萬一 id 唔喺 ITEMS（例如日後加 mode 加漏），唔好成個地圖死機
+      const it = ITEMS[id];
+      cell.setAttribute("aria-label", it ? `貨架：${it.name}` : "貨架");
     }else{
       cell.setAttribute("aria-label", "貨架（空）");
     }
@@ -1819,7 +1824,11 @@ function updateHotspots(){
 function renderMap(){
   if(!mapReady) buildMapGrid();
   const L = curList();
-  const ids = listIds(L).concat(shelfIds(L));
+  /* ⚠ 形狀 mode 嘅清單係「●×2 ▲×1 ■×2」—— 形狀名，唔係 item id。
+     如果照 listIds() 攞，會將 "circle"/"triangle" 塞入 shelfItems，
+     然後 ITEMS["circle"] → undefined → 成個地圖 render 死機。
+     形狀 mode 全部實物都喺貨架，所以淨係擺 shelfIds()。 */
+  const ids = isShapeMode() ? shelfIds(L) : listIds(L).concat(shelfIds(L));
   // assign up to shelf slots
   shelfItems = SHELF_SLOTS.map((_,i)=> ids[i] || null);
   player.x = 5; player.y = 5; player.facing = DIR_DOWN;
