@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BUILD:pixel-mart-shape-v2b-no-en -->
+<!-- BUILD:pixel-mart-week-route-v1 -->
 <html lang="zh-HK">
 <head>
 <meta charset="UTF-8">
@@ -577,14 +577,24 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
   flex-direction:column; gap:2px; min-height:158px;
   padding:14px 22px; min-width:min(230px,42vw);
 }
+.mode-btn.mode-rec{
+  outline:3px solid var(--ok);
+  box-shadow:0 0 0 3px rgba(46,125,50,.18);
+}
 .mode-tag{
   align-self:flex-start;
   background:var(--line); color:var(--paper);
   font-size:.78rem; padding:3px 10px; letter-spacing:.12em; margin-bottom:2px;
 }
+.mode-tag.rec{ background:var(--ok); color:#F4E4BC; }
 .mode-ico{ font-size:1.9rem; line-height:1.1; }
 .mode-name{ font-size:clamp(1.1rem,3.2vw,1.45rem); }
 .mode-sub{ font-size:.78rem; font-weight:700; letter-spacing:0; opacity:.85; }
+.week-route{
+  margin:8px 0 0; text-align:center; font-size:clamp(.78rem,2vw,.95rem);
+  font-weight:800; color:var(--ink); opacity:.88; line-height:1.45;
+}
+.week-route strong{ color:var(--ok); }
 
 /* ── 數量標記 ×3（只喺中學模式出現）
    唔可以用 --pixel-hi：嗰隻係為深色底調嘅，放喺米色卡／深色格都唔夠 contrast。
@@ -675,25 +685,28 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
         </div>
       </div>
       <h2 class="screen-h">PIXEL MART</h2>
-      <p class="hint">無人商店：冇人睇住，都要<strong>付足錢</strong>。<br>自己對清楚，再老實講。</p>
+      <p class="hint">無人商店：冇人睇住，都要<strong>付足錢</strong>。<br>自己對清楚，再老實講。<br><span style="font-size:.85em">星只獎比足 · 形錯≠不誠實</span></p>
+      <p class="week-route" id="weekRoute">活動週 11/23–27<br>
+        <strong>中學形狀 → 撳「中學·形」</strong>（中卡先）· 數量 →「中學·數」<br>
+        小學相同圖 → 用 plain 無人店（穩陣）</p>
       <div class="mode-pick" role="group" aria-label="選擇學習模式">
-        <button class="big primary mode-btn" id="btnModePrimary" type="button">
-          <span class="mode-tag">小學</span>
+        <button class="big alt mode-btn" id="btnModePrimary" type="button">
+          <span class="mode-tag">小學·試</span>
           <span class="mode-ico">🚪</span>
           <span class="mode-name">誠信劇場</span>
-          <span class="mode-sub">對清楚 · 老實付足</span>
+          <span class="mode-sub">相同圖 · 付足（plain更穩）</span>
         </button>
         <button class="big alt mode-btn" id="btnModeSecondary" type="button">
           <span class="mode-tag">中學·數</span>
           <span class="mode-ico">🔢</span>
           <span class="mode-name">數字配對</span>
-          <span class="mode-sub">數數 · 數量配對</span>
+          <span class="mode-sub">數量1–10 · 付足</span>
         </button>
-        <button class="big alt mode-btn" id="btnModeShape" type="button">
-          <span class="mode-tag">中學·形</span>
+        <button class="big primary mode-btn mode-rec" id="btnModeShape" type="button">
+          <span class="mode-tag rec">中學·形 · 推介</span>
           <span class="mode-ico">▲●■</span>
           <span class="mode-name">形狀購物</span>
-          <span class="mode-sub">跟形 · 唔好手多多</span>
+          <span class="mode-sub">跟形×數 · 忍手 · 付足</span>
         </button>
       </div>
     </section>
@@ -1300,8 +1313,16 @@ function renderDoor(){
   const dh = $("#doorH");
   if(dh){
     dh.textContent = isShapeMode()
-      ? `今日有 ${LISTS.length} 張形狀購物清單`
-      : `今日有 ${LISTS.length} 張購物清單`;
+      ? `形狀購物 · 先中卡再高卡（共 ${LISTS.length} 張）`
+      : isQtyMode()
+        ? `數量配對 · 今日 ${LISTS.length} 張`
+        : `今日有 ${LISTS.length} 張購物清單`;
+  }
+  const doorHint = document.querySelector("#s-door .hint");
+  if(doorHint){
+    doorHint.textContent = isShapeMode()
+      ? "中＝跟形忍手入門 · 高＝多餘圓要忍手 · 形錯≠不誠實"
+      : "㩒一張開始";
   }
   LISTS.forEach((L,i)=>{
     const done = i < state.listIndex;
