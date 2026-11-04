@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BUILD:pixel-mart-week-route-v1 -->
+<!-- BUILD:pixel-mart-yue-tts-v1 -->
 <html lang="zh-HK">
 <head>
 <meta charset="UTF-8">
@@ -1122,7 +1122,7 @@ const CONFIG = {
   perItemCheck : true,  // 畫面 3 逐項核對（true）定淨係並排睇（false）
   maxBasket    : 6,     // 籃容量上限，超出只作中性提示，唔視為錯
   sound        : true,  // WebAudio 音效
-  speech       : true,  // 粵語／中文 TTS（機械人出聲）
+  speech       : true,  // 硬鎖廣東話 TTS（zh-HK／Sinji／yue；唔 fallback 普通話）
 };
 
 /* ============================================================
@@ -1184,43 +1184,60 @@ const FACES = {
   thanks:"M40 74 Q60 94 80 74",                       // 大笑
 };
 
-/* 語音：優先 zh-HK／粵語，其次 zh-TW／zh-CN。失敗靜默，唔檔流程。 */
+/* 語音：硬鎖廣東話（zh-HK／yue／Sinji）。
+   有粵語聲 → 綁定；冇 → 只設 lang=zh-HK，**絕不**綁 zh-CN／zh-TW 普通話聲。 */
 let _voices = [];
+let _yueVoice = null;
 function refreshVoices(){
   try{ _voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; }catch(e){ _voices = []; }
+  _yueVoice = null;
 }
 if(typeof speechSynthesis !== "undefined"){
   refreshVoices();
   speechSynthesis.addEventListener("voiceschanged", refreshVoices);
 }
+function isYueVoice(v){
+  if(!v) return false;
+  const s = ((v.lang||"") + " " + (v.name||"")).toLowerCase();
+  if(/yue\b|zh[-_]?yue|cantonese|zh[-_]hk|hong\s*kong|sinji|善怡/.test(s)) return true;
+  if(/google\s*粤|google.*\bhk\b|microsoft.*(hiuman|juujai|wanlung)|yue-hk/.test(s)) return true;
+  return false;
+}
 function pickVoice(){
   if(!_voices.length) refreshVoices();
-  const score = (v)=>{
-    const s = (v.lang + " " + v.name).toLowerCase();
-    if(/yue|cantonese|zh-hk|hong kong/.test(s)) return 3;
-    if(/zh-tw|taiwan/.test(s)) return 2;
-    if(/zh-cn|chinese|cmn|mandarin|^zh\b/.test(s)) return 1;
-    return 0;
+  if(_yueVoice && _voices.indexOf(_yueVoice) >= 0) return _yueVoice;
+  const yue = _voices.filter(isYueVoice);
+  if(!yue.length){ _yueVoice = null; return null; }
+  const rank = (v)=>{
+    const s = ((v.lang||"") + " " + (v.name||"")).toLowerCase();
+    let r = 10;
+    if(/sinji|善怡/.test(s)) r += 6;
+    if(/zh[-_]hk/.test(s)) r += 4;
+    if(/yue|cantonese/.test(s)) r += 3;
+    if(v.localService) r += 2;
+    return r;
   };
-  let best = null, bestS = 0;
-  for(const v of _voices){
-    const s = score(v);
-    if(s > bestS){ best = v; bestS = s; }
-  }
-  return best;
+  yue.sort((a,b)=>rank(b)-rank(a));
+  _yueVoice = yue[0];
+  return _yueVoice;
 }
 function speak(text){
   if(!CONFIG.speech || !text) return;
   try{
     if(!window.speechSynthesis) return;
+    try{ speechSynthesis.resume(); }catch(e){}
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(String(text).replace(/[🤖⭐✅❌🛒💰]/g,"").trim());
+    const u = new SpeechSynthesisUtterance(String(text).replace(/[🤖⭐✅❌🛒💰🥈]/g,"").trim());
     if(!u.text) return;
     u.lang = "zh-HK";
     u.rate = 0.92;
     u.pitch = 1.05;
     const v = pickVoice();
-    if(v){ u.voice = v; u.lang = v.lang || "zh-HK"; }
+    if(v){
+      u.voice = v;
+      if(isYueVoice(v)) u.lang = v.lang || "zh-HK";
+      else u.lang = "zh-HK";
+    }
     speechSynthesis.speak(u);
   }catch(e){ /* 靜音／不支援唔影響流程 */ }
 }
@@ -1237,6 +1254,25 @@ function clearSay(){
   $("#mouth").setAttribute("d", FACES.neutral);
   stopSpeak();
 }
+/** 首次互動解鎖 TTS + 重新撈粵語聲（Safari/Chrome 要 gesture） */
+function unlockYueSpeech(){
+  try{
+    if(!window.speechSynthesis) return;
+    speechSynthesis.resume();
+    refreshVoices();
+    if(!_voices.length){
+      const warm = new SpeechSynthesisUtterance("");
+      warm.volume = 0; warm.lang = "zh-HK";
+      speechSynthesis.speak(warm);
+      speechSynthesis.cancel();
+      refreshVoices();
+    }
+  }catch(e){}
+}
+document.addEventListener("pointerdown", function _yueOnce(){
+  unlockYueSpeech();
+  document.removeEventListener("pointerdown", _yueOnce, true);
+}, true);
 
 /* ============================================================
    畫面切換
@@ -2553,6 +2589,7 @@ function openTeacher(){ $("#teacherOut").textContent = teacherText();
    事件
    ============================================================ */
 function startMode(m){
+  unlockYueSpeech();
   SFX.tap();
   setMode(m);
   renderStars();
