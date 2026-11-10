@@ -20,6 +20,8 @@
   --bg:        #1A1C2C;
   --bg-deep:   #2B2F4A;
   --card:      #F4E4BC;
+  --paper:     #F4E4BC;   /* ⚠ 之前只用 var(--paper) 但冇定義 → 靠繼承「啱巧」，
+                             補返正式值（= --card），畫面唔變，但唔再靠運氣 */
   --ink:       #1A1C2C;
   --ink-soft:  #3D3350;
   --line:      #0D0E16;
@@ -123,11 +125,14 @@ body::before{
 }
 .school-brand .sb-text{display:flex; flex-direction:column; gap:2px; min-width:0;}
 .school-brand .sb-name{
-  font-size:clamp(1rem,2.6vw,1.25rem); font-weight:900; color:var(--ink); line-height:1.2;
+  font-size:clamp(1rem,2.6vw,1.25rem); font-weight:900; color:var(--paper); line-height:1.2;
 }
 .school-brand .sb-sub{
-  font-size:clamp(.82rem,2vw,1rem); font-weight:700; color:var(--ink-soft); line-height:1.25;
+  font-size:clamp(.82rem,2vw,1rem); font-weight:700; color:var(--hud); line-height:1.25;
 }
+/* 證狀係淺色卡 → 品牌文字改深色（封面係深色底 → 用淺色） */
+#cert .school-brand .sb-name{ color:var(--ink); }
+#cert .school-brand .sb-sub{ color:var(--ink-soft); }
 #cert .school-brand{margin:0 auto 12px;}
 #cert .school-brand img{width:56px; height:56px;}
 #resultValue{
@@ -168,6 +173,18 @@ body::before{
   overflow-y:auto;
 }
 .screen.active{display:flex; animation:fade .35s ease-out; justify-content:safe center;}
+/* ⚠ HTML `hidden` 屬性嘅全局保險：
+     CSS 一旦寫咗 display:flex / grid，就會蓋過 hidden 屬性
+     → JS 設 .hidden = true 都冇效果（元素照樣出現）。
+     呢個 trap 已經咬過一次（櫃檯收據彈唔出、掃描步驟唔收埋）。
+     統一喺呢度封死，唔使逐個 class 補 [hidden]。 */
+[hidden]{ display:none !important; }
+/* ⚠ 內容過高時，justify-content:center 會令頂部被切走兼埋唔到（scroll 都返唔到）。
+   auto margin 技巧：夠位 → 置中；唔夠位 → 由頂開始（可以 scroll 落去）。
+   「清單常駐」係教學紅線 → 頂部條一定要見到。 */
+#s-map{ justify-content:flex-start; }
+#s-map::before{ content:""; margin-top:auto; }
+#s-map::after{ content:""; margin-bottom:auto; }
 @keyframes fade{from{opacity:0; transform:translateY(14px)}to{opacity:1; transform:none}}
 
 h2.screen-h{
@@ -282,8 +299,29 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
   color:var(--ink);
 }
 #basket .bico{font-size:2.8rem; line-height:1;}
-#basket .items{display:flex;flex-wrap:wrap;gap:4px;max-width:230px;}
+#basket .items{display:flex;flex-wrap:wrap;gap:4px;max-width:250px;
+  /* ⚠ 籃唔可以撐高：籃一高 → #bottombar 高 → #stage 被壓扁 → 頂部「清單常駐」條被切走 */
+  max-height:74px; overflow-y:auto;}
 #basket .items span{font-size:1.9rem; line-height:1.1;}
+/* 放返低掣：疊喺貨上面右邊角，唔會撐闊個籃 */
+#basket .items .bitem{position:relative; display:block;}
+/* 放返低：成件貨就係掣（目標 42px，比細 badge 大好多）
+   ⚠ 籃唔可以撐高 —— 籃一高，#bottombar 就高咗，#stage 被壓扁，
+     頂部「清單常駐」條會被推出畫面（教學紅線）。所以籃入面唔掛形狀 badge。 */
+#basket .items .bitem{
+  position:relative; display:block; padding:0; border:0; background:none;
+  cursor:pointer; margin:3px 7px 3px 0; line-height:1;
+}
+#basket .items button.bitem:hover{ filter:brightness(1.12); }
+#basket .items button.bitem:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+#basket .items .bundo-badge{
+  position:absolute; top:-7px; right:-9px; z-index:2;
+  width:21px; height:21px; border-radius:50%;
+  background:var(--line); color:var(--paper);
+  font-size:.72rem; line-height:1; font-weight:900;
+  display:grid; place-items:center;
+  border:2px solid var(--card);
+}
 #basket .cap{font-size:.85rem;font-weight:800;color:var(--ink-soft);}
 
 /* 貨架常駐清單條 */
@@ -362,7 +400,7 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
 .item-pic.lg{ width:clamp(3.2rem,12vw,5rem); height:clamp(3.2rem,12vw,5rem); border-width:3px; }
 .ls-dot .item-pic{ width:2.4rem; height:2.4rem; }
 .mini .item-pic{ width:2.8rem; height:2.8rem; }
-#bottombar .item-pic{ width:2.2rem; height:2.2rem; border-width:1.5px; }
+#bottombar .item-pic{ width:1.9rem; height:1.9rem; border-width:1.5px; }
 .shape-badge{
   display:inline-block; min-width:1.1em; text-align:center;
   font-weight:900; font-size:.85em; margin-left:2px;
@@ -377,7 +415,7 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
 /* 付足錢輕視覺：靜態橋樑圖，唔動畫、唔搶答、唔洩漏對錯 */
 #payBridge{
   display:flex; align-items:center; justify-content:center; gap:clamp(10px,2.5vw,18px);
-  flex-wrap:wrap; margin:0; padding:10px 16px;
+  flex-wrap:wrap; margin:0; padding:6px 14px;
   background:var(--card); border:3px solid var(--line); border-radius:16px;
   box-shadow:4px 4px 0 rgba(20,32,43,.12);
   max-width:min(520px,94vw);
@@ -386,7 +424,7 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
   display:flex; flex-direction:column; align-items:center; gap:2px;
   font-weight:900; line-height:1.15; text-align:center;
 }
-#payBridge .pb-ico{font-size:clamp(2.4rem,7vw,3.4rem); line-height:1;}
+#payBridge .pb-ico{font-size:clamp(1.9rem,5.5vw,2.7rem); line-height:1;}
 #payBridge .pb-lab{font-size:clamp(.95rem,2.2vw,1.15rem); color:var(--ink);}
 #payBridge .pb-arrow{
   font-size:clamp(1.6rem,4vw,2.2rem); font-weight:900; color:var(--ink);
@@ -396,7 +434,7 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
   max-width:15em; margin:0; line-height:1.3;}
 
 /* 櫃檯付費：三掣必須同大、同色階，唔可以令「比足」事先睇落係答案 */
-#s-pay{gap:16px;}
+#s-pay{gap:10px;}
 #payQ{font-size:clamp(1.3rem,3.6vw,2.1rem); font-weight:900; text-align:center;
   max-width:16em; margin:0; line-height:1.3;}
 .pay-row{display:flex; gap:14px; flex-wrap:wrap; justify-content:center; width:100%; max-width:920px;}
@@ -408,7 +446,9 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
 }
 .big.pay .ico{font-size:1.6em; line-height:1;}
 .big.pay:disabled{opacity:1; cursor:default; transform:none; box-shadow:5px 5px 0 rgba(20,32,43,.14);}
-#s-pay .pay-row .big{flex:1 1 160px;}
+/* 三掣一定要同一行見晒 —— 摺走一粒就會跌出畫面，學生見唔到「唔付款就走」
+   （嗰粒先係誠信測試嘅重點） */
+#s-pay .pay-row .big{ flex:1 1 150px; min-width:min(160px,30vw); }
 
 /* 結果 */
 #resultCard{padding:26px 32px; max-width:min(760px,94vw); text-align:center;}
@@ -572,7 +612,21 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
   text-align:center; margin:0;
 }
 /* ── 封面：模式選擇 ── */
-.mode-pick{ display:flex; flex-wrap:wrap; gap:18px; justify-content:center; }
+/* 三張卡排一行（grid 鎖死，唔會因為卡闊咗就摺成兩行令第三張卡出唔到）。
+   ⚠ 三個 mode 卡一定要同時見到 —— 封面係老師第一眼睇到嘅嘢，
+     推介嗰張卡如果要 scroll 先見到，等於推介咗個空氣。 */
+.mode-pick{
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px; justify-content:center; width:min(900px,94vw);
+}
+@media (max-width:720px){
+  .mode-pick{ gap:8px; }
+  #s-cover .mode-btn{ min-height:112px; padding:8px 6px; }
+  #s-cover .mode-name{ font-size:1rem; }
+  #s-cover .mode-sub{ font-size:.66rem; }
+  #s-cover .mode-ico{ font-size:1.5rem; }
+  #s-cover .mode-tag{ font-size:.66rem; padding:2px 6px; }
+}
 .mode-btn{
   flex-direction:column; gap:2px; min-height:158px;
   padding:14px 22px; min-width:min(230px,42vw);
@@ -591,10 +645,22 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
 .mode-name{ font-size:clamp(1.1rem,3.2vw,1.45rem); }
 .mode-sub{ font-size:.78rem; font-weight:700; letter-spacing:0; opacity:.85; }
 .week-route{
-  margin:8px 0 0; text-align:center; font-size:clamp(.78rem,2vw,.95rem);
-  font-weight:800; color:var(--ink); opacity:.88; line-height:1.45;
+  margin:4px 0 0; text-align:center; font-size:clamp(.76rem,1.8vw,.92rem);
+  font-weight:800; color:var(--paper); opacity:.95; line-height:1.4;
 }
-.week-route strong{ color:var(--ok); }
+.week-route strong{ color:var(--ok-soft); }
+/* 封面要同時見到：三張 mode 卡 + 引入掣 → 壓細封面專屬間距 */
+#s-cover{ gap:10px; }
+#s-cover .mode-pick{ gap:12px; }
+#s-cover .mode-btn{ min-height:126px; padding:10px 14px; }
+#s-cover .school-brand img{ width:46px; height:46px; }
+.intro-open{
+  font-family:inherit; font-weight:900; font-size:.92rem; cursor:pointer;
+  min-height:44px; padding:5px 16px;
+  background:var(--card); color:var(--ink);
+  border:3px solid var(--line); box-shadow:4px 4px 0 #0D0E16;
+}
+.intro-open:active{ transform:translate(2px,2px); box-shadow:2px 2px 0 #0D0E16; }
 
 /* ── 數量標記 ×3（只喺中學模式出現）
    唔可以用 --pixel-hi：嗰隻係為深色底調嘅，放喺米色卡／深色格都唔夠 contrast。
@@ -640,6 +706,128 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
 .qkey.bad{ background:#E8443A; color:var(--paper); box-shadow:4px 4px 0 #7A1C18; }
 .qkey.good{ background:#4E8C4A; color:var(--paper); box-shadow:4px 4px 0 #2C5730; }
 #btnQtyCancel{ font-size:1rem; min-height:52px; }
+
+/* ============================================================
+   中學 mode 新增：課堂引入 · 掃描商品 · 電子錢包拍卡
+   （2026-11-04 · 對應中學課程要求 3 / 4 / 5 + 活動一）
+   ============================================================ */
+
+/* ── 課堂引入 ───────────────────────────────────── */
+#s-intro{ gap:8px; }
+#introList{
+  width:min(760px,94vw);
+  display:flex; flex-direction:column; gap:8px;
+}
+.iq{
+  background:var(--card); border:4px solid var(--line);
+  box-shadow:4px 4px 0 #0D0E16;
+  padding:8px 12px; text-align:left; color:var(--ink);
+}
+.iq-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.iq-n{
+  flex:0 0 auto; width:32px; height:32px; border-radius:50%;
+  background:var(--ink); color:#fff; display:grid; place-items:center;
+  font-weight:900; font-size:1rem;
+}
+.iq-q{ flex:1 1 220px; font-size:clamp(1rem,2.6vw,1.25rem); font-weight:800; line-height:1.35; }
+.iq .spk, .iq-a{
+  flex:0 0 auto; font-family:inherit; font-weight:900; cursor:pointer;
+  min-height:42px; padding:4px 12px;
+  border:3px solid var(--line); background:var(--paper); color:var(--ink);
+}
+.iq .spk{ font-size:1.2rem; }
+.iq-a.on{ background:var(--ink); color:#fff; }
+.iq-ans{
+  margin-top:7px; padding-top:7px; border-top:3px dashed var(--line);
+  font-size:clamp(.88rem,2.1vw,1rem); font-weight:700; line-height:1.45;
+}
+.iq-ans[hidden]{ display:none; }
+.intro-actions{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; align-items:center; }
+#btnIntroSkip{ min-width:auto; }
+.intro-actions .big{ min-height:52px; }
+
+/* ── 掃描商品 ───────────────────────────────────── */
+#scanSum{
+  display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
+  background:var(--card); border:4px solid var(--line); box-shadow:4px 4px 0 #0D0E16;
+  padding:10px 18px; color:var(--ink); font-weight:900; font-size:clamp(1rem,2.6vw,1.2rem);
+}
+#scanSum strong{ color:var(--pixel-hi); font-size:1.15em; }
+.scan-list{
+  width:min(760px,94vw);
+  display:flex; flex-direction:column; gap:8px;
+}
+.scan-item{
+  display:flex; align-items:center; gap:12px;
+  background:var(--card); border:4px solid var(--line); box-shadow:4px 4px 0 #0D0E16;
+  padding:8px 12px; color:var(--ink);
+}
+.scan-item .si-pic{ flex:0 0 auto; width:52px; height:52px; display:grid; place-items:center; }
+.scan-item .si-pic .item-pic{ width:48px; height:48px; }
+.scan-item .si-pic span{ font-size:2.4rem; line-height:1; }
+.scan-item .si-txt{ flex:1 1 auto; font-weight:800; line-height:1.35; }
+.scan-item .si-txt .si-q{ color:var(--ink-soft); font-size:.88em; }
+.scan-item .si-price{ flex:0 0 auto; font-weight:900; font-size:1.05rem; }
+.scan-item.done{ background:#E7F3E4; }
+.scan-item .si-btn{
+  flex:0 0 auto; min-width:104px; min-height:48px;
+  font-family:inherit; font-weight:900; font-size:1rem; cursor:pointer;
+  border:3px solid var(--line); background:var(--paper); color:var(--ink);
+  box-shadow:4px 4px 0 var(--line);
+}
+.scan-item .si-btn:active{ transform:translate(2px,2px); box-shadow:2px 2px 0 var(--line); }
+.scan-item.done .si-btn{ background:#4E8C4A; color:#fff; box-shadow:4px 4px 0 #2C5730; }
+#scanCheck{
+  width:min(760px,94vw);
+  display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
+  background:var(--card); border:4px solid var(--line); box-shadow:4px 4px 0 #0D0E16;
+  padding:12px 14px; color:var(--ink);
+}
+#scanCheck .sc-col{ flex:1 1 240px; min-width:0; }
+#scanCheck .lab{
+  display:inline-block; background:var(--ink); color:#fff;
+  font-weight:900; font-size:.8rem; padding:3px 10px; margin-bottom:6px;
+}
+.sc-tally{ font-weight:800; font-size:clamp(.95rem,2.4vw,1.1rem); line-height:1.5; }
+
+/* ── 電子錢包 + 拍卡 + 收據 ─────────────────────── */
+#payTop{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; align-items:center; }
+.pay-amt{
+  background:var(--card); border:4px solid var(--line); box-shadow:4px 4px 0 #0D0E16;
+  padding:7px 20px; color:var(--ink); font-weight:900;
+  font-size:clamp(1.05rem,3vw,1.45rem);
+}
+.pay-amt strong{ color:var(--pixel-hi); font-size:1.2em; }
+.pay-amt[hidden]{ display:none; }
+.ewallet[hidden]{ display:none; }
+.ewallet{ display:flex; justify-content:center; }
+.ew-card{
+  display:flex; align-items:center; gap:12px;
+  background:var(--card); border:4px solid var(--line); box-shadow:4px 4px 0 #0D0E16;
+  padding:7px 16px; color:var(--ink);
+}
+.ew-brand{ font-weight:900; font-size:clamp(1rem,2.6vw,1.2rem); }
+.ew-tap{
+  font-weight:900; font-size:clamp(1rem,2.6vw,1.2rem);
+  background:var(--pixel-hi); color:#14202B; padding:6px 14px;
+  border:3px solid var(--line);
+}
+.pay-receipt{
+  background:var(--card); border:4px solid var(--line); box-shadow:8px 8px 0 var(--line);
+  padding:18px 22px; color:var(--ink); text-align:center;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  width:min(460px,94vw);
+}
+.pay-receipt[hidden]{ display:none; }
+.rc-ico{
+  width:56px; height:56px; border-radius:50%; display:grid; place-items:center;
+  background:#4E8C4A; color:#fff; font-size:1.9rem; font-weight:900;
+}
+.rc-ico.bad{ background:#B4762A; }
+.rc-ico.worst{ background:#6C6C78; }
+.rc-title{ font-size:clamp(1.15rem,3.2vw,1.6rem); font-weight:900; }
+.rc-amt{ font-size:clamp(1.6rem,4.5vw,2.4rem); font-weight:900; color:var(--pixel-hi); }
+.rc-note{ font-weight:700; line-height:1.5; font-size:clamp(.92rem,2.4vw,1.05rem); }
 
 /* ── 矮視窗（筆電、分屏、投影機 16:10）──
    「清單常駐」係教學紅線：清單一被捲出畫面，學生就唔知要攞咩。
@@ -689,6 +877,9 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
       <p class="week-route" id="weekRoute">活動週 11/23–27<br>
         <strong>中學形狀 → 撳「中學·形」</strong>（中卡先）· 數量 →「中學·數」<br>
         小學相同圖 → 用 plain 無人店（穩陣）</p>
+      <button class="intro-open" id="btnIntroOpen" type="button">
+        📖 課堂引入 · 無人商店係咩？
+      </button>
       <div class="mode-pick" role="group" aria-label="選擇學習模式">
         <button class="big alt mode-btn" id="btnModePrimary" type="button">
           <span class="mode-tag">小學·試</span>
@@ -700,14 +891,60 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
           <span class="mode-tag">中學·數</span>
           <span class="mode-ico">🔢</span>
           <span class="mode-name">數字配對</span>
-          <span class="mode-sub">數量1–10 · 付足</span>
+          <span class="mode-sub">數量1–10 · 掃描 · 拍卡</span>
         </button>
         <button class="big primary mode-btn mode-rec" id="btnModeShape" type="button">
           <span class="mode-tag rec">中學·形 · 推介</span>
           <span class="mode-ico">▲●■</span>
           <span class="mode-name">形狀購物</span>
-          <span class="mode-sub">跟形×數 · 忍手 · 付足</span>
+          <span class="mode-sub">跟形×數 · 掃描 · 拍卡</span>
         </button>
+      </div>
+    </section>
+
+    <!-- ── 畫面 0b：課堂引入（無人商店係咩）──────────────
+         中學課程要求「引入」：教師展示無人商店圖片，引導學生討論
+         ① 圖片中有沒有售貨員？
+         ② 沒有售貨員，我們要自己做什麼？要自己【嗶／掃描商品】同【拍卡付錢】
+         ③ 拿了東西可以直接放進書包走人嗎？還是先拍卡付錢才可以拿走？
+         每條有 🔊 讀出（老師帶全班討論），答案㩒「睇答案」先展開。 -->
+    <section class="screen" id="s-intro">
+      <h2 class="screen-h">無人商店係咩？</h2>
+      <p class="hint">先傾一傾，然後入去買嘢。</p>
+      <div id="introList">
+        <div class="iq">
+          <div class="iq-row">
+            <span class="iq-n">1</span>
+            <span class="iq-q">圖片入面，有冇售貨員？</span>
+            <button class="spk" type="button" data-say="圖片入面，有冇售貨員？">🔊</button>
+            <button class="iq-a" type="button" aria-expanded="false">睇答案</button>
+          </div>
+          <div class="iq-ans" hidden>冇售貨員。一個人都冇，冇人睇住你。</div>
+        </div>
+        <div class="iq">
+          <div class="iq-row">
+            <span class="iq-n">2</span>
+            <span class="iq-q">冇售貨員，我哋要自己做咩？</span>
+            <button class="spk" type="button" data-say="冇售貨員，我們要自己做什麼？要自己掃描商品，還要自己拍卡付錢。">🔊</button>
+            <button class="iq-a" type="button" aria-expanded="false">睇答案</button>
+          </div>
+          <div class="iq-ans" hidden>自己搵商品、自己掃描商品、自己拍卡付錢。<br>冇人幫你，冇人提醒你。</div>
+        </div>
+        <div class="iq">
+          <div class="iq-row">
+            <span class="iq-n">3</span>
+            <span class="iq-q">攞咗嘢，可以直接放落書包走人嗎？</span>
+            <button class="spk" type="button" data-say="拿了東西，可以直接放進書包走人嗎？還是要先拍卡付錢才可以拿走？">🔊</button>
+            <button class="iq-a" type="button" aria-expanded="false">睇答案</button>
+          </div>
+          <div class="iq-ans" hidden><strong>唔可以。</strong>要先掃描商品、拍卡付錢，付咗先可以攞走。<br>冇人監察都要咁做 —— 咁先叫誠信。</div>
+        </div>
+      </div>
+      <div class="intro-actions">
+        <button class="big primary" id="btnIntroGo" type="button">
+          <span class="ico">▶</span> 明白咗，開始購物
+        </button>
+        <button class="big ghost" id="btnIntroSkip" type="button" style="font-size:1rem;min-height:60px;">跳過引入</button>
       </div>
     </section>
 
@@ -804,7 +1041,40 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
       </div>
     </section>
 
-    <!-- ── 畫面 5：櫃檯付費（誠信主關） ─────────── -->
+    <!-- ── 畫面 5：掃描商品（中學 mode）────────────────────
+         中學課程要求 · 活動一：「將商品逐一掃瞄後核對商品數量及價格」
+         • 逐件掃描（每件貨一個 📷 掣）
+         • 掃完之後兩欄並排：清單要幾多 vs 我掃咗幾多 → 學生自己核對
+         • 應付金額逐件加出來（只係讀，唔使心算）
+         ⚠ 呢個畫面唔會話「啱 / 錯」—— 對錯留返去結果畫面先講，
+            免得洩漏答案（教學紅線：系統唔提前洩漏對錯）。 -->
+    <section class="screen" id="s-scan">
+      <h2 class="screen-h">掃描商品</h2>
+      <p class="hint" id="scanHint">逐件掃描。㩒每件貨嘅「📷 掃描」掣。</p>
+      <div id="scanSum">
+        <span class="ss-item">已掃 <strong id="scanCount">0 / 0</strong> 件</span>
+        <span class="ss-item">應付 <strong id="scanTotal">$0</strong></span>
+      </div>
+      <div id="scanList" class="scan-list"></div>
+      <div id="scanCheck">
+        <div class="sc-col">
+          <span class="lab">清單要</span>
+          <div id="scanWant" class="sc-tally"></div>
+        </div>
+        <div class="sc-col">
+          <span class="lab">我掃咗</span>
+          <div id="scanGot" class="sc-tally"></div>
+        </div>
+      </div>
+      <button class="big primary" id="btnScanDone" type="button" disabled>
+        <span class="ico">💳</span> 去拍卡付款
+      </button>
+    </section>
+
+    <!-- ── 畫面 6：櫃檯付費（誠信主關） ───────────
+         中學 mode：加電子錢包（模擬八達通／支付卡拍卡）+ 收據確認
+         ⚠ 誠信主關仍然係呢個畫面：三個選擇（拍卡付足 / 畀少啲 / 唔付款就走）
+            星仍然只獎「付足」。拍卡只係把「付款」變得真實，唔係自動扣錢。 -->
     <section class="screen" id="s-pay">
       <h2 class="screen-h">無人店櫃檯</h2>
       <div id="payBridge" aria-hidden="true">
@@ -813,16 +1083,40 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
           <span class="pb-lab">對清楚</span>
         </div>
         <span class="pb-arrow" aria-hidden="true">→</span>
+        <div class="pb-step" id="pbScanStep" hidden>
+          <span class="pb-ico">📷</span>
+          <span class="pb-lab">掃描</span>
+        </div>
+        <span class="pb-arrow" id="pbArrow2" aria-hidden="true" hidden>→</span>
         <div class="pb-step">
-          <span class="pb-ico">💰</span>
-          <span class="pb-lab">付足</span>
+          <span class="pb-ico" id="pbIco3">💰</span>
+          <span class="pb-lab" id="pbLab3">付足</span>
         </div>
       </div>
       <p id="payQ">你會點做？<br><span style="font-size:.72em;font-weight:700;color:var(--ink-soft);">冇人睇住都要自己付足</span></p>
-      <div class="pay-row" role="group" aria-label="付費選擇">
-        <button class="big pay" id="btnPayFull" type="button"><span class="ico">💰</span>比足錢</button>
-        <button class="big pay" id="btnPayLess" type="button"><span class="ico">🪙</span>比少錢</button>
-        <button class="big pay" id="btnPayNone" type="button"><span class="ico">🚶</span>唔比錢</button>
+      <div id="payTop">
+        <div id="payAmt" class="pay-amt" hidden>應付 <strong id="payAmtN">$0</strong></div>
+        <div id="ewallet" class="ewallet" hidden>
+          <div class="ew-card">
+            <span class="ew-brand">電子錢包</span>
+            <span class="ew-tap">📡 拍卡</span>
+          </div>
+        </div>
+      </div>
+      <div class="pay-row" role="group" aria-label="付費選擇" id="payRow">
+        <button class="big pay" id="btnPayFull" type="button"><span class="ico" id="payFullIco">💰</span><span id="payFullLab">比足錢</span></button>
+        <button class="big pay" id="btnPayLess" type="button"><span class="ico">🪙</span><span id="payLessLab">比少錢</span></button>
+        <button class="big pay" id="btnPayNone" type="button"><span class="ico">🚶</span><span id="payNoneLab">唔比錢</span></button>
+      </div>
+      <!-- 收據：中學 mode 拍卡之後出現，「確認已完成付款」 -->
+      <div id="payReceipt" class="pay-receipt" hidden>
+        <div class="rc-ico" id="rcIco">✓</div>
+        <div class="rc-title" id="rcTitle">付款完成</div>
+        <div class="rc-amt" id="rcAmt">$0</div>
+        <div class="rc-note" id="rcNote"></div>
+        <button class="big primary" id="btnReceiptOk" type="button">
+          <span class="ico">👍</span> 好，睇結果
+        </button>
       </div>
     </section>
 
@@ -851,6 +1145,10 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
         <p class="c-sub" style="margin-bottom:4px;">無人商店 · 誠信小助手</p>
         <h2 class="c-title">我識付足錢</h2>
         <p class="c-sub">冇人睇住都照付足。<br>自己對清楚，再老實負責。</p>
+        <p class="c-sub" id="certSteps" hidden>
+          冇售貨員 · 自己搵商品 · 逐件掃描 · 拍卡付錢<br>
+          冇人監察都誠信付款、遵守規則
+        </p>
         <div style="margin:18px 0;">
           <span class="c-name" id="certName">&nbsp;</span>
         </div>
@@ -931,33 +1229,35 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
 const SHAPE_MARK = { circle:"●", triangle:"▲", square:"■", rect:"▬" };
 const SHAPE_NAME = { circle:"圓形", triangle:"三角形", square:"正方形", rect:"長方形" };
 
+/* price = 單價（$）。中學 mode 掃描／拍卡用；細數目（$1–$4），
+   方便中度學生讀數（只係讀，唔使心算）。 */
 const ITEMS = {
-  apple:   {emo:"🍎", name:"蘋果",   shape:"circle"},
-  milk:    {emo:"🥛", name:"牛奶",   shape:"rect"},
-  cookie:  {emo:"🍪", name:"餅乾",   shape:"circle"},
-  banana:  {emo:"🍌", name:"香蕉",   shape:"rect"},
-  choco:   {emo:"🍫", name:"朱古力", shape:"rect"},
-  bread:   {emo:"🍞", name:"麵包",   shape:"square"},
-  grape:   {emo:"🍇", name:"葡萄",   shape:"circle"},
-  corn:    {emo:"🌽", name:"粟米",   shape:"triangle"},
-  cheese:  {emo:"🧀", name:"芝士",   shape:"triangle"},
-  juicebox:{emo:"🧃", name:"果汁盒", shape:"rect"},
-  melon:   {emo:"🍉", name:"西瓜",   shape:"circle"},
-  pear:    {emo:"🍐", name:"梨",     shape:"triangle"},
-  egg:     {emo:"🥚", name:"雞蛋",   shape:"circle"},
-  orange:  {emo:"🍊", name:"橙",     shape:"circle"},
-  chips:   {emo:"🍟", name:"薯片",   shape:"rect"},
+  apple:   {emo:"🍎", name:"蘋果",   shape:"circle", price:2},
+  milk:    {emo:"🥛", name:"牛奶",   shape:"rect",   price:3},
+  cookie:  {emo:"🍪", name:"餅乾",   shape:"circle", price:1},
+  banana:  {emo:"🍌", name:"香蕉",   shape:"rect",   price:1},
+  choco:   {emo:"🍫", name:"朱古力", shape:"rect",   price:2},
+  bread:   {emo:"🍞", name:"麵包",   shape:"square", price:3},
+  grape:   {emo:"🍇", name:"葡萄",   shape:"circle", price:2},
+  corn:    {emo:"🌽", name:"粟米",   shape:"triangle", price:2},
+  cheese:  {emo:"🧀", name:"芝士",   shape:"triangle", price:3},
+  juicebox:{emo:"🧃", name:"果汁盒", shape:"rect",   price:2},
+  melon:   {emo:"🍉", name:"西瓜",   shape:"circle", price:3},
+  pear:    {emo:"🍐", name:"梨",     shape:"triangle", price:2},
+  egg:     {emo:"🥚", name:"雞蛋",   shape:"circle", price:1},
+  orange:  {emo:"🍊", name:"橙",     shape:"circle", price:2},
+  chips:   {emo:"🍟", name:"薯片",   shape:"rect",   price:1},
   /* 形狀購物：超市真實包裝（白底圖）；judge 用 shape 計數 */
-  c1:{emo:"🍪", name:"圓形餅乾盒",   shape:"circle",   img:"assets/shape/c1-cookie-tin.jpg"},
-  c2:{emo:"🍪", name:"圓形曲奇罐",   shape:"circle",   img:"assets/shape/c2-biscuit-box.jpg"},
-  c3:{emo:"🍮", name:"圓形布甸杯",   shape:"circle",   img:"assets/shape/c3-pudding-cup.jpg"},
-  t1:{emo:"🍰", name:"三角形蛋糕盒", shape:"triangle", img:"assets/shape/t1-cake-box.jpg"},
-  t2:{emo:"🍙", name:"三角形飯糰",   shape:"triangle", img:"assets/shape/t2-onigiri.jpg"},
-  s1:{emo:"🧻", name:"正方形紙巾盒", shape:"square",   img:"assets/shape/s1-tissue-box.jpg"},
-  s2:{emo:"🍫", name:"正方形朱古力盒", shape:"square", img:"assets/shape/s2-choco-box.jpg"},
-  s3:{emo:"🧈", name:"正方形豆腐盒", shape:"square",   img:"assets/shape/s3-tofu.jpg"},
-  r1:{emo:"🧃", name:"長方形果汁盒", shape:"rect",     img:"assets/shape/r1-juice.jpg"},
-  r2:{emo:"🥛", name:"長方形牛奶盒", shape:"rect",     img:"assets/shape/r2-milk.jpg"},
+  c1:{emo:"🍪", name:"圓形餅乾盒",   shape:"circle",   price:3, img:"assets/shape/c1-cookie-tin.jpg"},
+  c2:{emo:"🍪", name:"圓形曲奇罐",   shape:"circle",   price:4, img:"assets/shape/c2-biscuit-box.jpg"},
+  c3:{emo:"🍮", name:"圓形布甸杯",   shape:"circle",   price:2, img:"assets/shape/c3-pudding-cup.jpg"},
+  t1:{emo:"🍰", name:"三角形蛋糕盒", shape:"triangle", price:4, img:"assets/shape/t1-cake-box.jpg"},
+  t2:{emo:"🍙", name:"三角形飯糰",   shape:"triangle", price:2, img:"assets/shape/t2-onigiri.jpg"},
+  s1:{emo:"🧻", name:"正方形紙巾盒", shape:"square",   price:2, img:"assets/shape/s1-tissue-box.jpg"},
+  s2:{emo:"🍫", name:"正方形朱古力盒", shape:"square", price:3, img:"assets/shape/s2-choco-box.jpg"},
+  s3:{emo:"🧈", name:"正方形豆腐盒", shape:"square",   price:2, img:"assets/shape/s3-tofu.jpg"},
+  r1:{emo:"🧃", name:"長方形果汁盒", shape:"rect",     price:2, img:"assets/shape/r1-juice.jpg"},
+  r2:{emo:"🥛", name:"長方形牛奶盒", shape:"rect",     price:3, img:"assets/shape/r2-milk.jpg"},
 };
 
 /* 形狀清單展示用代表圖（需求係 shape×qty，唔綁死某一件） */
@@ -981,18 +1281,22 @@ const LISTS_SECONDARY = [
     shelf:["banana","juicebox","pear"] },
 ];
 
-/* ── 中學·形狀購物定案：數1–5；●▲■入單；▬干擾；供≥需+餘 ──
+/* ── 中學·形狀購物（2026-11-04 對中學課程要求更新）
+   要求 3：學生要能辨認「圓形、三角形及長方形」物件
+   → 清單用 ●▲▬；正方形 ■ 改做干擾，逼學生分辨 ■ 同 ▬（兩個都係「方」）
+   中卡：每種都有 1 件餘裕（搵錯咗可以再搵）
+   高卡：多一項 ■ 要，而且架上只有 1 個長方形（搵到就係唯一答案）
    銀=跟單；金=跟單+比足。形錯≠不誠實。 */
 const LISTS_SHAPE = [
   {
     level:"中",
-    shapes:[{shape:"circle",qty:2},{shape:"triangle",qty:1},{shape:"square",qty:2}],
-    shelf:["c1","c2","c3","t1","t2","s1","s2","s3","r1"],
+    shapes:[{shape:"circle",qty:2},{shape:"triangle",qty:1},{shape:"rect",qty:1}],
+    shelf:["c1","c2","c3","t1","t2","r1","r2","s1","s2"],
   },
   {
     level:"高",
-    shapes:[{shape:"circle",qty:2},{shape:"triangle",qty:1},{shape:"square",qty:1}],
-    shelf:["c1","c2","c3","t1","t2","s1","r1","r2"],
+    shapes:[{shape:"circle",qty:2},{shape:"triangle",qty:1},{shape:"square",qty:1},{shape:"rect",qty:1}],
+    shelf:["c1","c2","c3","t1","t2","r1","s1","s2","s3"],
   },
 ];
 
@@ -1003,13 +1307,14 @@ const MODES = {
 };
 
 let LISTS = LISTS_PRIMARY;
+let introFrom = "cover";   // 課堂引入完之後去邊：cover（封面）定 door（門口）
 
 function setMode(m){
   const M = MODES[m] ? m : "primary";
   state.mode = M;
   LISTS = MODES[M].lists;
   state.listIndex = 0;
-  state.basket = []; state.basketN = {}; state.checks = []; state.cursor = 0;
+  state.basket = []; state.basketN = {}; state.basketFrom = {}; state.scanned = {}; state.checks = []; state.cursor = 0;
   state.declared = false; state.declareAns = null;
   state.paid = false; state.payChoice = null;
   state.silvers = 0;
@@ -1102,17 +1407,21 @@ function needShapeCounts(list){
 function shapeMatchInfo(list){
   const need = needShapeCounts(list);
   const got = basketShapeCounts();
-  const keys = ["circle","triangle","square"];
+  /* ⚠ 2026-11-04 修正：舊版寫死「攞咗 rect 就當多取」（因為當時長方形只做干擾，
+     從來唔入清單）。但中學要求 3 要學生辨認長方形 → 長方形已經入單，
+     舊寫法會令「跟單啱」都判成「多咗長方形」→ 永遠派唔到金星。
+     而家四種形狀用同一條規則：攞多咗先算多取。 */
+  const keys = ["circle","triangle","square","rect"];
   let mathOk = true;
   const missing = [], extraShapes = [];
   keys.forEach(k=>{
-    if((got[k]||0) !== (need[k]||0)){
+    const n = need[k] || 0, g = got[k] || 0;
+    if(g !== n){
       mathOk = false;
-      if((got[k]||0) < (need[k]||0)) missing.push(k);
-      if((got[k]||0) > (need[k]||0)) extraShapes.push(k);
+      if(g < n) missing.push(k);
+      if(g > n) extraShapes.push(k);
     }
   });
-  if((got.rect||0) > 0){ mathOk = false; if(!extraShapes.includes("rect")) extraShapes.push("rect"); }
   const tookExtra = extraShapes.length > 0;
   return { need, got, mathOk, missing, extraShapes, tookExtra };
 }
@@ -1133,6 +1442,8 @@ const state = {
   listIndex : 0,
   basket    : [],   // 已攞嘅貨 id（每種一件 entry）
   basketN   : {},   // id → 件數（小學模式永遠 = 1）
+  basketFrom: {},   // id → 攞自邊個貨架位（放返低要用）
+  scanned    : {},   // id → 已掃描（中學 mode 掃描枱用）
   checks    : [],   // {item, said:'has'|'no', right:bool}
   cursor    : 0,    // 核對到第幾件
   stars     : 0,    // 金：形狀=跟單+比足；其他=比足
@@ -1306,8 +1617,8 @@ function lockInput(){ inputLockUntil = performance.now() + INPUT_LOCK_MS; }
 function go(stage){
   $$(".screen").forEach(s=>s.classList.remove("active"));
   const map = {
-    cover:"#s-cover", door:"#s-door", map:"#s-map", shop:"#s-map",
-    check:"#s-check", declare:"#s-declare", pay:"#s-pay",
+    cover:"#s-cover", intro:"#s-intro", door:"#s-door", map:"#s-map", shop:"#s-map",
+    check:"#s-check", declare:"#s-declare", scan:"#s-scan", pay:"#s-pay",
     result:"#s-result", cert:"#s-cert",
   };
   $(map[stage]).classList.add("active");
@@ -1357,8 +1668,10 @@ function renderDoor(){
   const doorHint = document.querySelector("#s-door .hint");
   if(doorHint){
     doorHint.textContent = isShapeMode()
-      ? "中＝跟形忍手入門 · 高＝多餘圓要忍手 · 形錯≠不誠實"
-      : "㩒一張開始";
+      ? "中＝3 種形狀（●▲▬）· 高＝4 種形狀（長方形只有一件）· 形錯≠不誠實"
+      : isQtyMode()
+        ? "中學數量 · 揀完會掃描同拍卡"
+        : "㩒一張開始";
   }
   LISTS.forEach((L,i)=>{
     const done = i < state.listIndex;
@@ -1911,6 +2224,7 @@ function pickItemFromMap(id, shelfIndex, n){
   const q = (n && n > 1) ? n : 1;
   if(!state.basket.includes(id)) state.basket.push(id);
   state.basketN[id] = q;
+  state.basketFrom[id] = shelfIndex;   // 記住攞自邊個架位（放返低要用）
   shelfItems[shelfIndex] = null;
   SFX.tap();
   renderBasket();
@@ -1924,6 +2238,131 @@ function pickItemFromMap(id, shelfIndex, n){
     qtyTxt = (q > 1) ? `${ITEMS[id].name} ${q} 件` : ITEMS[id].name;
   }
   say(n2===1 ? `攞咗 ${qtyTxt}。` : `攞咗 ${qtyTxt}。籃度有 ${n2} 樣。`, "neutral");
+}
+
+/* ============================================================
+   放返低（要求 4：按指定數量選取商品 → 數錯要有得救）
+   ⚠ 淨係限喺地圖畫面（未做逐項核對之前）——
+     核對之後再改籃，會令「逐項核對」記錄同實際唔一致。
+   ⚠ 冇呢個功能嘅話：學生數錯一件 → 冇得救 → 成張單直接失敗，
+     中度學生會直接撞牆（而唔係學到嘢）。
+   ============================================================ */
+function putBack(id){
+  if(!onMapScreen()) return;
+  const i = state.basket.indexOf(id);
+  if(i < 0) return;
+  const idx = state.basketFrom[id];
+  state.basket.splice(i,1);
+  delete state.basketN[id];
+  delete state.basketFrom[id];
+  if(idx != null && shelfItems[idx] == null) shelfItems[idx] = id;
+  SFX.tap();
+  renderBasket(); updateHotspots();
+  say(`放返低${ITEMS[id].name}。再搵清楚啲。`, "neutral");
+}
+
+/* ============================================================
+   中學 mode：掃描商品 + 電子錢包拍卡
+   （中學課程要求 5 + 活動一：
+     「將商品逐一掃瞄後核對商品數量及價格」
+     「使用模擬電子錢包付款，並確認已完成付款」）
+   ⚠ 教學紅線位：
+     • 掃描畫面**唔會**話啱／錯 → 對錯留到結果畫面先講（唔提前洩漏對錯）
+     • 誠信主關仍然喺櫃檯三選；拍卡只係令「付款」變真實，唔係自動扣錢
+     • 星仍然只獎「付足」
+   ============================================================ */
+function isMiddle(){ return isQtyMode() || isShapeMode(); }
+function priceOf(id){ return (ITEMS[id] && ITEMS[id].price) || 0; }
+function money(n){ return "$" + n; }
+
+/* 掃咗嘅貨（只計已掃描嗰啲） */
+function scannedShapeCounts(){
+  const got = {circle:0, triangle:0, square:0, rect:0};
+  state.basket.forEach(id=>{
+    if(!state.scanned[id]) return;
+    const sh = shapeOf(id);
+    if(!sh) return;
+    got[sh] = (got[sh]||0) + (state.basketN[id] || 1);
+  });
+  return got;
+}
+function scannedTotal(){
+  let t = 0;
+  state.basket.forEach(id=>{
+    if(state.scanned[id]) t += priceOf(id) * (state.basketN[id] || 1);
+  });
+  return t;
+}
+function basketTotal(){
+  let t = 0;
+  state.basket.forEach(id=>{ t += priceOf(id) * (state.basketN[id] || 1); });
+  return t;
+}
+
+/* 掃描枱：逐件掃 + 兩欄核對（清單要 vs 我掃咗）+ 應付金額 */
+function renderScan(){
+  const L = curList();
+  const box = $("#scanList"); box.innerHTML = "";
+  state.basket.forEach(id=>{
+    const n = state.basketN[id] || 1;
+    const done = !!state.scanned[id];
+    const row = document.createElement("div");
+    row.className = "scan-item" + (done ? " done" : "");
+    const pic = document.createElement("div");
+    pic.className = "si-pic";
+    pic.innerHTML = itemPicHTML(id);
+    const txt = document.createElement("div");
+    txt.className = "si-txt";
+    const sh = shapeOf(id);
+    txt.innerHTML = `${ITEMS[id].name}${sh ? ` ${SHAPE_MARK[sh]}` : ""}`
+                  + (n > 1 ? ` <span class="si-q">× ${n} 件</span>` : "");
+    const pr = document.createElement("div");
+    pr.className = "si-price";
+    pr.textContent = done ? money(priceOf(id) * n) : `${money(priceOf(id))} × ${n}`;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "si-btn";
+    btn.textContent = done ? "✓ 已掃描" : "📷 掃描";
+    btn.disabled = done;
+    btn.setAttribute("aria-label", `掃描 ${ITEMS[id].name}`);
+    btn.addEventListener("click", ()=>scanOne(id));
+    row.appendChild(pic); row.appendChild(txt); row.appendChild(pr); row.appendChild(btn);
+    box.appendChild(row);
+  });
+
+  // 核對兩欄：純數字對照，唔話啱／錯
+  const want = $("#scanWant"), got = $("#scanGot");
+  if(isShapeMode()){
+    const need = needShapeCounts(L);
+    want.innerHTML = ["circle","triangle","square","rect"].filter(k=>need[k])
+      .map(k=>`${SHAPE_MARK[k]} × ${need[k]}`).join("　") || "—";
+    const g = scannedShapeCounts();
+    got.innerHTML = ["circle","triangle","square","rect"].filter(k=>g[k])
+      .map(k=>`${SHAPE_MARK[k]} × ${g[k]}`).join("　") || "—";
+  }else{
+    want.innerHTML = listIds(L).map(id=>`${ITEMS[id].name} × ${listQty(L,id)}`).join("　") || "—";
+    got.innerHTML = state.basket.filter(id=>state.scanned[id])
+      .map(id=>`${ITEMS[id].name} × ${state.basketN[id]||1}`).join("　") || "—";
+  }
+
+  const total = state.basket.length;
+  const doneN = state.basket.filter(id=>state.scanned[id]).length;
+  $("#scanCount").textContent = `${doneN} / ${total}`;
+  $("#scanTotal").textContent = money(scannedTotal());
+  const all = (total > 0 && doneN >= total);
+  $("#btnScanDone").disabled = !all;
+  $("#scanHint").textContent = all
+    ? "掃晒啦。對一對兩邊嘅數量同金額，啱先去拍卡。"
+    : `逐件掃描。仲有 ${total - doneN} 件未掃。`;
+}
+
+function scanOne(id){
+  if(state.scanned[id]) return;
+  state.scanned[id] = true;
+  SFX.tap();
+  renderScan();
+  const n = state.basketN[id] || 1;
+  say(`掃咗${ITEMS[id].name}，${money(priceOf(id)*n)}。`, "neutral");
 }
 
 function doInteract(){
@@ -2065,19 +2504,40 @@ function pickItem(id, el){
 function renderBasket(){
   const L = curList();
   const box = $("#basketItems"); box.innerHTML = "";
+  const canUndo = onMapScreen();   // 只有取貨階段可以放返低
   state.basket.forEach(id=>{
     const n = state.basketN[id] || 1;
-    const s = document.createElement("span");
     const sh = shapeOf(id);
-    if(isShapeMode() && sh){
-      s.innerHTML = itemPicHTML(id);
-      s.setAttribute("aria-label", ITEMS[id].name);
-    }else{
-      s.innerHTML = `${ITEMS[id].emo}<span class="qt">${(isQtyMode() && n>1) ? "×"+n : ""}</span>`;
-      s.setAttribute("aria-label", `${ITEMS[id].name} ${n} 件`);
+    const el = document.createElement(canUndo ? "button" : "span");
+    el.className = "bitem";
+    if(canUndo){
+      el.type = "button";
+      el.setAttribute("aria-label", `放返低 ${ITEMS[id].name}`);
+      el.title = "放返低";
+      el.addEventListener("click", ()=>putBack(id));
     }
-    s.setAttribute("role","img");
-    box.appendChild(s);
+    if(isShapeMode() && sh){
+      // ⚠ 籃底 caption 已經寫「●2 ▲1 ▬1」→ 唔好再掛形狀 badge
+      //   （badge 30px 闊，會令籃撐到 4 行，將「清單常駐」條推出畫面 = 踩教學紅線）
+      const src = itemImg(id);
+      el.innerHTML = src
+        ? `<img class="item-pic" src="${src}" alt="${ITEMS[id].name}">`
+        : `<span>${ITEMS[id].emo||""}</span>`;
+      el.setAttribute("aria-label", canUndo ? `放返低 ${ITEMS[id].name}` : ITEMS[id].name);
+    }else{
+      el.innerHTML = `${ITEMS[id].emo}<span class="qt">${(isQtyMode() && n>1) ? "×"+n : ""}</span>`;
+      el.setAttribute("aria-label", canUndo ? `放返低 ${ITEMS[id].name} ${n} 件` : `${ITEMS[id].name} ${n} 件`);
+    }
+    if(canUndo){
+      const u = document.createElement("span");
+      u.className = "bundo-badge";
+      u.setAttribute("aria-hidden","true");
+      u.textContent = "↩";
+      el.appendChild(u);
+    }else{
+      el.setAttribute("role","img");
+    }
+    box.appendChild(el);
   });
   const n = state.basket.length;
   if(isShapeMode()){
@@ -2313,11 +2773,79 @@ function declare(ans){
   $("#btnSame").disabled = true;
   $("#btnDiff").disabled = true;
   SFX.tap();
+  // 中學 mode：中間加多一步「掃描商品 + 核對數量及價格」
+  // ⚠ 掃描喺對貨之後 → 掃描畫面唔會洩漏「啱定錯」（教學紅線）
+  if(isMiddle()){
+    state.scanned = {};
+    renderScan();
+    go("scan");
+    say("逐件掃描你買嘅嘢，睇清楚有幾多件、要幾多錢。", "neutral");
+    return;
+  }
+  preparePay();
   go("pay");
   say("到櫃檯啦。冇人睇住，你會點做？", "neutral");
 }
 
+/* 櫃檯畫面：中學 mode 加電子錢包 + 金額；小學 mode 保持原樣 */
+function preparePay(){
+  const mid = isMiddle();
+  $("#pbScanStep").hidden = !mid;
+  $("#pbArrow2").hidden = !mid;
+  $("#pbIco3").textContent = mid ? "💳" : "💰";
+  $("#pbLab3").textContent = mid ? "拍卡" : "付足";
+  $("#payFullIco").textContent = mid ? "💳" : "💰";
+  $("#payFullLab").textContent = mid ? "拍卡付足錢" : "比足錢";
+  $("#payLessLab").textContent = mid ? "只畀一半錢" : "比少錢";
+  $("#payNoneLab").textContent = mid ? "唔付款就走" : "唔比錢";
+  $("#ewallet").hidden = !mid;
+  $("#payAmt").hidden = !mid;
+  $("#payAmtN").textContent = money(basketTotal());
+  $("#payRow").hidden = false;
+  $("#payReceipt").hidden = true;
+  $("#payBridge").hidden = false;
+  $("#payQ").hidden = false;
+  $("#payTop").hidden = false;
+}
+
+/* 收據：中學 mode 付款之後出現 —— 「確認已完成付款」 */
+function showReceipt(choice){
+  const total = basketTotal();
+  const ico = $("#rcIco"), title = $("#rcTitle"), amt = $("#rcAmt"), note = $("#rcNote");
+  if(choice === "full"){
+    ico.className = "rc-ico";
+    ico.textContent = "✓";
+    title.textContent = "付款完成";
+    amt.textContent = money(total);
+    note.innerHTML = "📡 拍卡成功 · 全部付清<br>付咗錢，你可以攞走你買嘅嘢。";
+    say(`拍卡成功，付清${money(total)}。多謝你完成付款。`, "thanks");
+  }else if(choice === "less"){
+    const half = Math.ceil(total / 2);
+    ico.className = "rc-ico bad";
+    ico.textContent = "!";
+    title.textContent = "仲未付足";
+    amt.textContent = money(half);
+    note.innerHTML = `📡 拍咗 ${money(half)} · 仲差 <strong>${money(total - half)}</strong><br>未付足就攞走，對店唔公平。`;
+    say(`仲差${money(total - half)}。無人商店都要付清先走。`, "think");
+  }else{
+    ico.className = "rc-ico worst";
+    ico.textContent = "✕";
+    title.textContent = "冇付款";
+    amt.textContent = "$0";
+    note.innerHTML = "你冇拍卡就攞咗嘢走。<br>冇人睇住都要誠信 —— 唔可以攞未付款嘅嘢。";
+    say("你冇付款就攞走。未付款嘅嘢唔可以攞。", "think");
+  }
+  $("#payRow").hidden = true;
+  // 收據一出，就收埋流程圖／提問／金額（收據本身已經講清）—— 否則太長，掣會跌出畫面
+  $("#payBridge").hidden = true;
+  $("#payQ").hidden = true;
+  $("#payTop").hidden = true;
+  $("#payReceipt").hidden = false;
+  SFX.soft();
+}
+
 const PAY_LABEL = { full:"比足錢", less:"比少錢", none:"唔比錢" };
+const PAY_LABEL_MID = { full:"拍卡付足", less:"只畀一半", none:"冇付款就走" };
 
 function pay(choice){
   // 雙擊防護：三掣任一撳完即鎖，避免跳過結果
@@ -2366,6 +2894,10 @@ function pay(choice){
     多咗: extraLabel,
     形狀跟單: isShapeMode() ? (r.allMatch ? "✓ 跟單" : "✗ 未跟單") : "—",
     多取: isShapeMode() ? (r.tookExtra ? "✓ 有多取/干擾" : "無多取") : "—",
+    掃描件數: isMiddle()
+      ? `${state.basket.filter(id=>state.scanned[id]).length} / ${state.basket.length} 件`
+      : "—",
+    應付金額: isMiddle() ? money(basketTotal()) : "—",
     逐項核對: state.checks.length
       ? state.checks.map(c=>{
           const lab = isShapeMode() ? `${ITEMS[c.item].emo}${SHAPE_MARK[shapeOf(c.item)]||""}` : ITEMS[c.item].name;
@@ -2375,7 +2907,7 @@ function pay(choice){
     誠實答覆: state.declareAns==="same" ? "一樣" : "唔一樣",
     實際: r.allMatch ? "一樣" : "唔一樣",
     一致: truthful ? "✓ 對貨誠實" : "✗ 對貨有落差",
-    付費: PAY_LABEL[choice] || choice,
+    付費: (isMiddle() ? PAY_LABEL_MID : PAY_LABEL)[choice] || choice,
     付足: paidFull ? "✓ 付足" : "✗ 未付足",
     獎: award === "gold" ? "⭐金" : award === "silver" ? "🥈銀" : "—",
   });
@@ -2396,6 +2928,11 @@ function pay(choice){
 
   $("#btnNext").textContent = (state.listIndex >= LISTS.length-1) ? "睇我嘅獎狀 🏅" : "下一張清單";
   paintResult();
+  // 中學 mode：先出收據（「確認已完成付款」），撳「好」先入結果畫面
+  if(isMiddle()){
+    showReceipt(choice);
+    return;
+  }
   go("result");
 }
 
@@ -2466,6 +3003,12 @@ function paintResult(){
   }
 
   t.textContent = title;
+  // 中學 mode：結果畫面用「拍卡」語言（要求 5：電子付款流程）
+  if(isMiddle()){
+    money = money.replace("錢：你付足咗。", "錢：你拍卡付足咗。")
+                 .replace("錢：比少錢，未夠數。", "錢：只畀一半錢，未夠數。")
+                 .replace("錢：唔比錢就走，唔得。", "錢：冇拍卡就攞走，唔得。");
+  }
   b.textContent = goods + "\n" + money;
   v.hidden = false;
   v.textContent = value;
@@ -2488,10 +3031,12 @@ function armPay(){
   ["#btnPayFull","#btnPayLess","#btnPayNone"].forEach(s=>{
     const el = $(s); if(el) el.disabled = false;
   });
+  const rc = $("#payReceipt"); if(rc){ rc.hidden = true; }
+  const row = $("#payRow"); if(row){ row.hidden = false; }
 }
 
 function startList(){
-  state.basket = []; state.basketN = {}; state.checks = []; state.cursor = 0;
+  state.basket = []; state.basketN = {}; state.basketFrom = {}; state.scanned = {}; state.checks = []; state.cursor = 0;
   armDeclare(); armPay();
   $("#rewardStar").style.display = "none"; $("#rewardStar").textContent = "⭐";
   const rv = $("#resultValue"); if(rv){ rv.hidden = true; rv.textContent = ""; }
@@ -2500,7 +3045,7 @@ function startList(){
 
 function resetAll(){
   state.listIndex = 0; state.stars = 0; state.silvers = 0; state.log = [];
-  state.basket = []; state.basketN = {}; state.checks = []; state.cursor = 0;
+  state.basket = []; state.basketN = {}; state.basketFrom = {}; state.scanned = {}; state.checks = []; state.cursor = 0;
   state.declared = false; state.declareAns = null;
   state.paid = false; state.payChoice = null;
   armDeclare(); armPay();
@@ -2519,7 +3064,8 @@ function nextList(){
     $("#certStars").textContent = n
       ? Array.from({length:n},()=>"⭐").join(" ")
       : "（今次未有付足星）";
-    $("#certName").textContent = $("#nameInput").value.trim() || " ";
+    $("#certName").textContent = $("#nameInput").value.trim() || " ";
+    const csteps = $("#certSteps"); if(csteps) csteps.hidden = !isMiddle();
     go("cert");
     if(isShapeMode()){
       if(state.stars >= LISTS.length){
@@ -2538,6 +3084,13 @@ function nextList(){
     }
   }else{
     state.listIndex++;
+    /* ⚠️ 新一單由「空籃」開始。
+       籃嘅真正重置喺 startList()（揀完單入地圖嗰刻），但門口畫面喺
+       startList() 之前 —— 如果唔喺呢度清，門口會顯示上一單嘅貨
+       （「籃度有 3 樣嘢」），而且「放返低」↩ 掣仲喺度但按落冇反應
+       （putBack 只喺地圖畫面生效）→ 誤導學生，以為自己已經攞咗嘢。 */
+    state.basket = []; state.basketN = {}; state.basketFrom = {};
+    renderBasket();
     renderDoor(); go("door");
     say("做咗一單喇，仲有 " + (LISTS.length - state.listIndex) + " 張單。", "happy");
   }
@@ -2561,6 +3114,7 @@ function teacherText(){
       `  漏咗：${r.漏咗}｜多咗：${r.多咗}`,
       `  形狀跟單：${r.形狀跟單||"—"}｜多取：${r.多取||"—"}｜獎：${r.獎||"—"}`,
       `  逐項核對：${r.逐項核對}`,
+      `  掃描：${r.掃描件數||"—"}｜應付：${r.應付金額||"—"}`,
       `  對貨：答「${r.誠實答覆}」｜實際「${r.實際}」｜${r.一致}`,
       `  付費：${r.付費}｜${r.付足}`,
       ""
@@ -2593,17 +3147,67 @@ function startMode(m){
   SFX.tap();
   setMode(m);
   renderStars();
+  // 中學 mode：先做「課堂引入」（中學課程要求嘅引入討論），再入去買嘢
+  if(isMiddle()){
+    introFrom = "door";
+    go("intro");
+    say("先傾一傾：無人商店係咩。", "happy");
+    return;
+  }
   renderDoor(); go("door");
   const msg = m === "shape"
-    ? `形狀購物：跟 ●▲■ 數量，唔好手多多。銀=跟單，金=跟單+付足。今日 ${LISTS.length} 張！`
+    ? `形狀購物：跟清單嘅形狀同數量，唔好手多多。銀=跟單，金=跟單+付足。今日 ${LISTS.length} 張！`
     : m === "secondary"
-    ? `中學數字：睇清清單每樣要幾多件，行去貨架數清楚件數先攞。今日 ${LISTS.length} 張單！`
+    ? `中學數字：睇清清單每樣要幾多件，行去貨架數清楚件數先攞。之後掃描同拍卡。今日 ${LISTS.length} 張單！`
     : `無人商店：攞完要自己對，再付足錢。今日 ${LISTS.length} 張單！`;
   say(msg, "happy");
 }
 $("#btnModePrimary").addEventListener("click", ()=>startMode("primary"));
 $("#btnModeSecondary").addEventListener("click", ()=>startMode("secondary"));
 $("#btnModeShape").addEventListener("click", ()=>startMode("shape"));
+
+/* ── 課堂引入（中學課程要求「引入」討論）─────────────
+   老師帶全班傾 3 條問題；答案要㩒「睇答案」先展開（唔會自動劇透）。 */
+$("#btnIntroOpen").addEventListener("click", ()=>{
+  unlockYueSpeech(); SFX.tap();
+  introFrom = "cover";
+  go("intro");
+});
+function leaveIntro(){
+  SFX.tap();
+  if(introFrom === "door"){ renderDoor(); go("door"); }
+  else { go("cover"); }
+}
+$("#btnIntroGo").addEventListener("click", leaveIntro);
+$("#btnIntroSkip").addEventListener("click", leaveIntro);
+$$(".iq-a").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    SFX.tap();
+    // ⚠ 用 closest(".iq")，唔可以用 parentElement ——
+    //   掣嘅 parent 係 .iq-row（同一行），答案係 .iq-row 嘅兄弟（.iq 下面）
+    const ans = b.closest(".iq").querySelector(".iq-ans");
+    const on = ans.hidden;
+    ans.hidden = !on;
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-expanded", on ? "true" : "false");
+    b.textContent = on ? "收起答案" : "睇答案";
+  });
+});
+$$(".spk").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    unlockYueSpeech(); SFX.tap();
+    say(b.dataset.say, "neutral");
+  });
+});
+
+/* ── 中學 mode：掃描枱 → 拍卡 → 收據 ─────────────── */
+$("#btnScanDone").addEventListener("click", ()=>{
+  SFX.tap(); preparePay(); go("pay");
+  say("去櫃檯拍卡。冇人睇住，你會點做？", "neutral");
+});
+$("#btnReceiptOk").addEventListener("click", ()=>{
+  SFX.tap(); go("result");
+});
 $("#btnQtyCancel").addEventListener("click", ()=>{
   SFX.tap(); closeQtyPanel(); say("冇問題，慢慢數。","neutral");
 });
