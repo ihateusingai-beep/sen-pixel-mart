@@ -345,6 +345,13 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
   display:grid; place-items:center;
   font-size:clamp(1.9rem,5vw,2.8rem); line-height:1;
 }
+/* 小學「商品圖片」清單條：相片填滿格仔 */
+#listStrip .ls-dot.ls-pic{ background:#fff; }
+#listStrip .ls-dot.ls-pic .item-pic{ width:clamp(38px,7vw,54px); height:clamp(38px,7vw,54px); border-width:2px; }
+#listStrip .ls-dot .nm{ display:block; font-size:.62rem; font-weight:800; color:#FFF3D6; line-height:1.1; }
+/* ⚠ 清單條底色係深色 → qt 唔可以用 var(--ink)（深色），
+   否則「×2」完全睇唔到（.ls-dot .qt 原本就係深色）。 */
+#listStrip .ls-dot .qt{ color:#FFF3D6; font-size:.85em; }
 #s-shop{gap:12px;}
 #s-shop .hint{margin-top:-4px;}
 #s-shop .tiles{gap:12px;}
@@ -400,12 +407,19 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
 .item-pic.lg{ width:clamp(3.2rem,12vw,5rem); height:clamp(3.2rem,12vw,5rem); border-width:3px; }
 .ls-dot .item-pic{ width:2.4rem; height:2.4rem; }
 .mini .item-pic{ width:2.8rem; height:2.8rem; }
+/* 小學「商品圖片」喺核對枱：相片要填滿格仔先睇得清 */
+.mini.pic-cell{ background:#fff; }
+.mini .nm{ font-size:.72rem; font-weight:800; color:var(--ink); margin-left:4px; }
 #bottombar .item-pic{ width:1.9rem; height:1.9rem; border-width:1.5px; }
 .shape-badge{
   display:inline-block; min-width:1.1em; text-align:center;
   font-weight:900; font-size:.85em; margin-left:2px;
 }
 .list-card .dot .item-pic{ width:2.5rem; height:2.5rem; }
+/* 小學「商品圖片」卡：相片係任務主體，要夠大先睇得清 */
+.list-card .dot.pic-dot .item-pic{ width:clamp(3rem,13vw,4rem); height:clamp(3rem,13vw,4rem); }
+.list-card .dot.pic-dot{ font-size:clamp(2.1rem,5vw,2.9rem); }
+.list-card .dot .nm{ font-size:.85em; font-weight:800; color:var(--ink); margin-left:4px; }
 
 #zoom .zoom-cap{font-size:clamp(.95rem,2.2vw,1.2rem); font-weight:800; color:var(--ink-soft);}
 #s-check .big{min-height:84px; min-width:min(180px,38vw); font-size:clamp(1.2rem,3vw,1.7rem);
@@ -746,6 +760,52 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
 #btnIntroSkip{ min-width:auto; }
 .intro-actions .big{ min-height:52px; }
 
+/* ── 順序圖卡配對（小學引入）────────────────────── */
+#introOrder{
+  margin-top:14px; padding:12px 14px;
+  background:var(--card); border:4px solid var(--line); box-shadow:4px 4px 0 #0D0E16;
+  border-radius:12px;
+}
+#introOrder[hidden]{ display:none; }
+.order-h{ margin:0 0 4px; font-size:clamp(1.05rem,2.8vw,1.35rem); font-weight:900; color:var(--ink); }
+.order-picks, .order-slots{
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:10px 0;
+}
+.order-slots{ padding-top:10px; border-top:3px dashed var(--line); }
+.ocard, .oslot{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  min-width:92px; min-height:76px; padding:8px 10px;
+  background:#FFF3D6; border:4px solid var(--line); border-radius:10px;
+  box-shadow:3px 3px 0 #0D0E16; color:var(--ink);
+  font-weight:900; cursor:pointer; font-size:1rem; line-height:1.2;
+}
+.ocard:hover:not(:disabled){ background:#FFE7A8; }
+.ocard:active:not(:disabled){ transform:translate(2px,2px); box-shadow:1px 1px 0 #0D0E16; }
+.ocard:disabled{ opacity:.45; cursor:default; }
+.oslot{ background:#EFE3C4; }
+.oslot.filled{ background:#DFF3C6; }
+.oslot:disabled{ cursor:default; }
+.ocard .oe, .oslot .oe{ font-size:1.9rem; line-height:1; }
+.ocard .on, .oslot .on{ font-size:.92rem; }
+#introOrder .hint{ color:var(--ink-soft); }
+.order-hint{
+  margin:6px 0 0; font-weight:800; font-size:clamp(.9rem,2.3vw,1.05rem); color:var(--ink-soft);
+}
+.order-hint.good{ color:var(--ok); }
+.order-hint.bad{ color:var(--no); }
+
+/* 引入畫面（4 條問題 + 順序配對）喺矮/窄視窗要收窄啲，
+   否則要 scroll 先見到配對同「開始購物」掣。 */
+@media (max-height:780px){
+  #s-intro{ gap:10px; padding-top:12px; }
+  #s-intro .iq{ padding:8px 10px; }
+  #s-intro .iq-q{ font-size:clamp(.95rem,2.2vw,1.12rem); }
+  #introOrder{ margin-top:8px; padding:8px 10px; }
+  .ocard, .oslot{ min-width:78px; min-height:62px; padding:6px 8px; }
+  .ocard .oe, .oslot .oe{ font-size:1.5rem; }
+  .order-picks, .order-slots{ margin:7px 0; }
+}
+
 /* ── 掃描商品 ───────────────────────────────────── */
 #scanSum{
   display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
@@ -876,16 +936,16 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
       <p class="hint">無人商店：冇人睇住，都要<strong>付足錢</strong>。<br>自己對清楚，再老實講。<br><span style="font-size:.85em">星只獎比足 · 形錯≠不誠實</span></p>
       <p class="week-route" id="weekRoute">活動週 11/23–27<br>
         <strong>中學形狀 → 撳「中學·形」</strong>（中卡先）· 數量 →「中學·數」<br>
-        小學相同圖 → 用 plain 無人店（穩陣）</p>
+        小學配對 → 撳「小學·配對」</p>
       <button class="intro-open" id="btnIntroOpen" type="button">
         📖 課堂引入 · 無人商店係咩？
       </button>
       <div class="mode-pick" role="group" aria-label="選擇學習模式">
         <button class="big alt mode-btn" id="btnModePrimary" type="button">
-          <span class="mode-tag">小學·試</span>
+          <span class="mode-tag">小學·配對</span>
           <span class="mode-ico">🚪</span>
-          <span class="mode-name">誠信劇場</span>
-          <span class="mode-sub">相同圖 · 付足（plain更穩）</span>
+          <span class="mode-name">圖片配對</span>
+          <span class="mode-sub">相片搵實物 · 掃描 · 拍卡</span>
         </button>
         <button class="big alt mode-btn" id="btnModeSecondary" type="button">
           <span class="mode-tag">中學·數</span>
@@ -909,37 +969,21 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
          ③ 拿了東西可以直接放進書包走人嗎？還是先拍卡付錢才可以拿走？
          每條有 🔊 讀出（老師帶全班討論），答案㩒「睇答案」先展開。 -->
     <section class="screen" id="s-intro">
-      <h2 class="screen-h">無人商店係咩？</h2>
-      <p class="hint">先傾一傾，然後入去買嘢。</p>
-      <div id="introList">
-        <div class="iq">
-          <div class="iq-row">
-            <span class="iq-n">1</span>
-            <span class="iq-q">圖片入面，有冇售貨員？</span>
-            <button class="spk" type="button" data-say="圖片入面，有冇售貨員？">🔊</button>
-            <button class="iq-a" type="button" aria-expanded="false">睇答案</button>
-          </div>
-          <div class="iq-ans" hidden>冇售貨員。一個人都冇，冇人睇住你。</div>
-        </div>
-        <div class="iq">
-          <div class="iq-row">
-            <span class="iq-n">2</span>
-            <span class="iq-q">冇售貨員，我哋要自己做咩？</span>
-            <button class="spk" type="button" data-say="冇售貨員，我們要自己做什麼？要自己掃描商品，還要自己拍卡付錢。">🔊</button>
-            <button class="iq-a" type="button" aria-expanded="false">睇答案</button>
-          </div>
-          <div class="iq-ans" hidden>自己搵商品、自己掃描商品、自己拍卡付錢。<br>冇人幫你，冇人提醒你。</div>
-        </div>
-        <div class="iq">
-          <div class="iq-row">
-            <span class="iq-n">3</span>
-            <span class="iq-q">攞咗嘢，可以直接放落書包走人嗎？</span>
-            <button class="spk" type="button" data-say="拿了東西，可以直接放進書包走人嗎？還是要先拍卡付錢才可以拿走？">🔊</button>
-            <button class="iq-a" type="button" aria-expanded="false">睇答案</button>
-          </div>
-          <div class="iq-ans" hidden><strong>唔可以。</strong>要先掃描商品、拍卡付錢，付咗先可以攞走。<br>冇人監察都要咁做 —— 咁先叫誠信。</div>
-        </div>
+      <h2 class="screen-h" id="introH">無人商店係咩？</h2>
+      <p class="hint" id="introHint">先傾一傾，然後入去買嘢。</p>
+      <div id="introList"><!-- JS 動態生成（每個 mode 嘅問題唔同）--></div>
+
+      <!-- ── 小學引入：順序圖卡配對（要求：小朋友點樣買東西？）
+           ①拿商品 → ②掃描 → ③拍卡
+           ⚠ 呢個係「練習」，唔影響星星、唔影響誠信判斷。 -->
+      <div id="introOrder" hidden>
+        <h3 class="order-h">小朋友點樣買嘢？㩒啱次序</h3>
+        <p class="hint">㩒下面 3 張卡，由頭到尾排成正確次序。</p>
+        <div id="orderPicks" class="order-picks" role="group" aria-label="圖卡：撳一張開始排"></div>
+        <div id="orderSlots" class="order-slots" role="group" aria-label="我嘅次序"></div>
+        <p class="order-hint" id="orderHint" role="status" aria-live="polite">撳一張卡開始排。</p>
       </div>
+
       <div class="intro-actions">
         <button class="big primary" id="btnIntroGo" type="button">
           <span class="ico">▶</span> 明白咗，開始購物
@@ -1248,27 +1292,45 @@ const ITEMS = {
   orange:  {emo:"🍊", name:"橙",     shape:"circle", price:2},
   chips:   {emo:"🍟", name:"薯片",   shape:"rect",   price:1},
   /* 形狀購物：超市真實包裝（白底圖）；judge 用 shape 計數 */
-  c1:{emo:"🍪", name:"圓形餅乾盒",   shape:"circle",   price:3, img:"assets/shape/c1-cookie-tin.jpg"},
-  c2:{emo:"🍪", name:"圓形曲奇罐",   shape:"circle",   price:4, img:"assets/shape/c2-biscuit-box.jpg"},
-  c3:{emo:"🍮", name:"圓形布甸杯",   shape:"circle",   price:2, img:"assets/shape/c3-pudding-cup.jpg"},
-  t1:{emo:"🍰", name:"三角形蛋糕盒", shape:"triangle", price:4, img:"assets/shape/t1-cake-box.jpg"},
-  t2:{emo:"🍙", name:"三角形飯糰",   shape:"triangle", price:2, img:"assets/shape/t2-onigiri.jpg"},
-  s1:{emo:"🧻", name:"正方形紙巾盒", shape:"square",   price:2, img:"assets/shape/s1-tissue-box.jpg"},
-  s2:{emo:"🍫", name:"正方形朱古力盒", shape:"square", price:3, img:"assets/shape/s2-choco-box.jpg"},
-  s3:{emo:"🧈", name:"正方形豆腐盒", shape:"square",   price:2, img:"assets/shape/s3-tofu.jpg"},
-  r1:{emo:"🧃", name:"長方形果汁盒", shape:"rect",     price:2, img:"assets/shape/r1-juice.jpg"},
-  r2:{emo:"🥛", name:"長方形牛奶盒", shape:"rect",     price:3, img:"assets/shape/r2-milk.jpg"},
+  c1:{emo:"🍪", name:"圓形餅乾盒",   sname:"曲奇",   shape:"circle",   price:3, img:"assets/shape/c1-cookie-tin.jpg"},
+  c2:{emo:"🍪", name:"圓形曲奇罐",   sname:"曲奇",   shape:"circle",   price:4, img:"assets/shape/c2-biscuit-box.jpg"},
+  c3:{emo:"🍮", name:"圓形布甸杯",   sname:"布甸",   shape:"circle",   price:2, img:"assets/shape/c3-pudding-cup.jpg"},
+  t1:{emo:"🍰", name:"三角形蛋糕盒", sname:"蛋糕",   shape:"triangle", price:4, img:"assets/shape/t1-cake-box.jpg"},
+  t2:{emo:"🍙", name:"三角形飯糰",   sname:"飯糰",   shape:"triangle", price:2, img:"assets/shape/t2-onigiri.jpg"},
+  s1:{emo:"🧻", name:"正方形紙巾盒", sname:"紙巾",   shape:"square",   price:2, img:"assets/shape/s1-tissue-box.jpg"},
+  s2:{emo:"🍫", name:"正方形朱古力盒", sname:"朱古力", shape:"square", price:3, img:"assets/shape/s2-choco-box.jpg"},
+  s3:{emo:"🧈", name:"正方形豆腐盒", sname:"豆腐",   shape:"square",   price:2, img:"assets/shape/s3-tofu.jpg"},
+  r1:{emo:"🧃", name:"長方形果汁盒", sname:"果汁",   shape:"rect",     price:2, img:"assets/shape/r1-juice.jpg"},
+  r2:{emo:"🥛", name:"長方形牛奶盒", sname:"牛奶",   shape:"rect",     price:3, img:"assets/shape/r2-milk.jpg"},
 };
 
 /* 形狀清單展示用代表圖（需求係 shape×qty，唔綁死某一件） */
 const SHAPE_REP = { circle:"c1", triangle:"t1", square:"s1", rect:"r1" };
 
 
-/* 三張清單：items = 清單上要取的；shelf = 額外干擾項 */
+/* ── 小學（2026-11-11 對小學課程要求更新）──────────────────
+   要求 3「能配對商品圖片與實物」：
+   • 初、中：清單 = 商品相片 → 貨架 = 實物 emoji → 逐張搵返對應嘅實物
+   • 高：    清單 = 購物清單（名 + ×數量）→ 貨架 = 商品相片 → 搵相片
+   ⚠️ 「相片」同「實物」係兩種唔同呈現，先做到真正嘅配對；
+     如果清單同貨架都係同一個符號，就只係「搵返同一樣嘢」，唔算配對。
+   ⚠️ 圖片用現成嘅真實超市包裝相（assets/shape/*.jpg，無文字），
+     貨架用對應嘅日常 emoji 實物符號。
+   ⚠️ c2 唔用（曲奇罐同 c1 餅乾盒都係 🍪，配對會有歧義）。
+   pic 欄位 = 呢張卡用邊種呈現：
+     "list" = 清單用相片、貨架用實物
+     "name" = 清單用名+數量、貨架用相片
+   ─────────────────────────────────────────────────────────── */
 const LISTS_PRIMARY = [
-  { items:["apple","milk","cookie"],   shelf:["banana","bread","egg"] },
-  { items:["banana","choco","bread"],  shelf:["apple","cheese","chips"] },
-  { items:["grape","corn","cheese"],   shelf:["banana","juicebox","pear"] },
+  { level:"初", pic:"list",
+    items:[{id:"c1", qty:1}],
+    shelf:["c3","t1","t2","s1","s2","s3","r1","r2"] },
+  { level:"中", pic:"list",
+    items:[{id:"s2", qty:1},{id:"r2", qty:1}],
+    shelf:["c1","c3","t1","t2","s1","s3","r1"] },
+  { level:"高", pic:"name",
+    items:[{id:"c1", qty:2},{id:"t2", qty:1}],
+    shelf:["c3","t1","s1","s2","s3","r1"] },
 ];
 
 /* ── 中學·數字配對：items {id,qty} ── */
@@ -1301,7 +1363,7 @@ const LISTS_SHAPE = [
 ];
 
 const MODES = {
-  primary:   { key:"primary",   label:"小學",     sub:"對清楚 · 老實付足", ico:"🚪", lists:LISTS_PRIMARY,   qty:false, shape:false },
+  primary:   { key:"primary",   label:"小學",     sub:"配對圖片同實物",      ico:"🚪", lists:LISTS_PRIMARY,   qty:false, shape:false },
   secondary: { key:"secondary", label:"中學·數",  sub:"數數 · 數字配對",    ico:"🔢", lists:LISTS_SECONDARY, qty:true,  shape:false },
   shape:     { key:"shape",     label:"中學·形",  sub:"跟形 · 唔好手多多", ico:"▲●■", lists:LISTS_SHAPE,     qty:false, shape:true  },
 };
@@ -1314,7 +1376,7 @@ function setMode(m){
   state.mode = M;
   LISTS = MODES[M].lists;
   state.listIndex = 0;
-  state.basket = []; state.basketN = {}; state.basketFrom = {}; state.scanned = {}; state.checks = []; state.cursor = 0;
+  state.basket = []; state.basketN = {}; state.basketFrom = {}; state.basketSlots = {}; state.scanned = {}; state.checks = []; state.cursor = 0;
   state.declared = false; state.declareAns = null;
   state.paid = false; state.payChoice = null;
   state.silvers = 0;
@@ -1325,6 +1387,18 @@ function setMode(m){
 }
 function isQtyMode(){ return !!(MODES[state.mode] && MODES[state.mode].qty); }
 function isShapeMode(){ return !!(MODES[state.mode] && MODES[state.mode].shape); }
+function isPrimaryMode(){ return state.mode === "primary"; }
+/* 小學「圖片 ↔ 實物」呈現 flag（per-card）
+   pic:"list" → 清單用商品相片、貨架用實物 emoji
+   pic:"name" → 清單用名 + 數量、貨架用商品相片 */
+function listUsesPic(){ return !!(curList() && curList().pic === "list"); }
+function shelfUsesPic(){ return !!(curList() && curList().pic === "name"); }
+/* 小學名（"正方形豆腐盒" → "豆腐"，小學生讀得出） */
+function smallName(id){
+  const it = ITEMS[id];
+  if(!it) return id;
+  return isPrimaryMode() ? (it.sname || it.name) : it.name;
+}
 function curList(){ return LISTS[state.listIndex]; }
 function listIds(list){
   if(list.shapes) return list.shapes.map(s => s.shape);
@@ -1336,7 +1410,9 @@ function listQty(list, id){
     const e = list.shapes.find(s => s.shape === id);
     return e ? e.qty : 0;
   }
-  if(!isQtyMode()) return 1;
+  /* ⚠️ 唔可以再用 `if(!isQtyMode()) return 1` ——
+     小學高卡嘅清單都寫 ×數量（要學生搵相片 + 攞夠件數），
+     所以數量要由 items 入面讀，唔可以淨係靠 mode flag。 */
   const e = list.items.find(i => (typeof i === "string" ? i : i.id) === id);
   return (e && typeof e === "object" && e.qty) ? e.qty : 1;
 }
@@ -1345,7 +1421,6 @@ function qtyTag(list, id){
     const q = listQty(list, id);
     return q ? "×"+q : "";
   }
-  if(!isQtyMode()) return "";
   const q = listQty(list, id);
   return q > 1 ? "×"+q : "";
 }
@@ -1354,17 +1429,21 @@ function nameQty(list, id){
     const q = listQty(list, id);
     return (SHAPE_MARK[id]||"") + SHAPE_NAME[id] + (q ? "×"+q : "");
   }
-  return ITEMS[id].name + qtyTag(list, id);
+  return smallName(id) + qtyTag(list, id);
 }
 function shapeOf(id){ return (ITEMS[id] && ITEMS[id].shape) || null; }
 function itemImg(id){ return (ITEMS[id] && ITEMS[id].img) || ""; }
-function itemPicHTML(id, cls){
+function itemPicHTML(id, cls, noBadge){
   if(!id || !ITEMS[id]) return "";
   const src = itemImg(id);
   const sh = shapeOf(id);
-  const badge = sh ? `<span class="shape-badge" aria-hidden="true">${SHAPE_MARK[sh]||""}</span>` : "";
+  /* ⚠️ 小學 mode 唔要形狀 badge：
+     小學要求 3 係「配對商品圖片與實物」，badge 會令任務變成「搵形狀」，
+     而且形狀對小學要求冇作用（會提前洩漏答案）。 */
+  const badge = (noBadge || !sh) ? "" : `<span class="shape-badge" aria-hidden="true">${SHAPE_MARK[sh]||""}</span>`;
+  const alt = isPrimaryMode() ? smallName(id) : ITEMS[id].name;
   if(src){
-    return `<img class="item-pic ${cls||""}" src="${src}" alt="${ITEMS[id].name}" loading="eager">${badge}`;
+    return `<img class="item-pic ${cls||""}" src="${src}" alt="${alt}" loading="eager">${badge}`;
   }
   return `<span>${ITEMS[id].emo||""}</span>${badge}`;
 }
@@ -1443,6 +1522,7 @@ const state = {
   basket    : [],   // 已攞嘅貨 id（每種一件 entry）
   basketN   : {},   // id → 件數（小學模式永遠 = 1）
   basketFrom: {},   // id → 攞自邊個貨架位（放返低要用）
+  basketSlots: {},  // id → 每件貨各自嘅架位（小學高卡同一款有 2 件，要分開放返）
   scanned    : {},   // id → 已掃描（中學 mode 掃描枱用）
   checks    : [],   // {item, said:'has'|'no', right:bool}
   cursor    : 0,    // 核對到第幾件
@@ -1622,6 +1702,8 @@ function go(stage){
     result:"#s-result", cert:"#s-cert",
   };
   $(map[stage]).classList.add("active");
+  /* 引入畫面內容跟 mode 唔同 → 每次入都要重畫 */
+  if(stage === "intro") renderIntro();
   lockInput();
   $("#progress").textContent = stage==="cert"
     ? `完成晒 ${LISTS.length} 張單`
@@ -1663,7 +1745,7 @@ function renderDoor(){
       ? `形狀購物 · 先中卡再高卡（共 ${LISTS.length} 張）`
       : isQtyMode()
         ? `數量配對 · 今日 ${LISTS.length} 張`
-        : `今日有 ${LISTS.length} 張購物清單`;
+        : `配對圖片同實物 · 今日 ${LISTS.length} 張`;
   }
   const doorHint = document.querySelector("#s-door .hint");
   if(doorHint){
@@ -1671,7 +1753,7 @@ function renderDoor(){
       ? "中＝3 種形狀（●▲▬）· 高＝4 種形狀（長方形只有一件）· 形錯≠不誠實"
       : isQtyMode()
         ? "中學數量 · 揀完會掃描同拍卡"
-        : "㩒一張開始";
+        : "初、中睇相片搵實物 · 高睇清單搵相片 · 揀完會掃描同拍卡";
   }
   LISTS.forEach((L,i)=>{
     const done = i < state.listIndex;
@@ -1682,6 +1764,13 @@ function renderDoor(){
     let rows;
     if(isShapeMode() && L.shapes){
       rows = L.shapes.map(s=>`<span class="row"><span class="dot">${shapeNeedPicHTML(s.shape,s.qty)}</span></span>`).join("");
+    }else if(isPrimaryMode() && L.pic === "list"){
+      /* ⚠️ 小學初/中：清單 = 商品相片（唔顯示名、唔顯示形狀 badge）
+         貨架 = 實物 emoji → 學生要由「相」搵返「實物」（要求 3 嘅配對） */
+      rows = listIds(L).map(id=>`<span class="row"><span class="dot pic-dot">${itemPicHTML(id,"",true)}<span class="qt">${qtyTag(L,id)}</span></span></span>`).join("");
+    }else if(isPrimaryMode() && L.pic === "name"){
+      /* ⚠️ 小學高：清單 = 名 + 數量（冇相片）→ 貨架 = 相片 → 搵相片 */
+      rows = listIds(L).map(id=>`<span class="row"><span class="dot">${ITEMS[id].emo}<span class="qt">${qtyTag(L,id)}</span><span class="nm">${smallName(id)}</span></span></span>`).join("");
     }else{
       rows = listIds(L).map(id=>`<span class="row"><span class="dot">${ITEMS[id].emo}<span class="qt">${qtyTag(L,id)}</span></span></span>`).join("");
     }
@@ -1900,14 +1989,20 @@ function drawBang(ctx){
 }
 
 /* 貨架上面嘅嘢用 emoji 畫：特教學生靠樣認嘢，
-   唔好用抽象 pixel 圖案取代（會失去辨識度）。 */
+   唔好用抽象 pixel 圖案取代（會失去辨識度）。
+   ⚠️ 小學 mode 例外：貨架要按卡顯示「實物 emoji」定「商品相片」
+      （要求 3「配對商品圖片與實物」—— 兩者必須唔同呈現先算配對）。
+   ⚠️ 形狀 badge 只喺形狀 mode 出現：小學唔需要，而且會提前洩漏形狀答案。 */
 function drawItemEmoji(ctx,id,tx,ty){
   if(!id || !ITEMS[id]) return;
   const x = tx*TILE, y = ty*TILE;
   const src = itemImg(id);
   const im = src ? _imgCache[src] : null;
+  const primary = isPrimaryMode();
+  const wantImg = primary ? (shelfUsesPic() && !!src) : (!isQtyMode() && !!src);
+  const wantBadge = !primary && isShapeMode();
   ctx.save();
-  if(im && im.complete && im.naturalWidth){
+  if(wantImg && im && im.complete && im.naturalWidth){
     // 白底小框 + 貨圖（清晰輪廓）
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(x+1, y+1, TILE-2, TILE-3);
@@ -1916,8 +2011,8 @@ function drawItemEmoji(ctx,id,tx,ty){
     ctx.strokeRect(x+1, y+1, TILE-2, TILE-3);
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(im, x+2, y+2, TILE-4, TILE-5);
-    // 角標形
-    const sh = shapeOf(id);
+    // 角標形（只有形狀 mode）
+    const sh = wantBadge ? shapeOf(id) : null;
     if(sh){
       ctx.font = "bold 7px sans-serif";
       ctx.textAlign = "right";
@@ -2044,7 +2139,17 @@ function renderListStrip(){
   listIds(L).forEach(id=>{
     const d = document.createElement("div");
     d.className = "ls-dot";
-    d.innerHTML = `${ITEMS[id].emo}<span class="qt">${qtyTag(L,id)}</span>`;
+    /* ⚠️ 小學：清單呈現要同門口卡一致（初/中＝相片、高＝名+數量）
+       —— 否則「清單常駐」條同門口嗰張單對唔上，學生會以為自己睇錯單。
+       呢條係教學紅線（清單必須常駐），所以一定要跟門口同一套呈現。 */
+    if(isPrimaryMode() && L.pic === "list"){
+      d.classList.add("ls-pic");
+      d.innerHTML = itemPicHTML(id,"",true);
+    }else if(isPrimaryMode() && L.pic === "name"){
+      d.innerHTML = `${ITEMS[id].emo}<span class="nm">${smallName(id)}<span class="qt">${qtyTag(L,id)}</span></span>`;
+    }else{
+      d.innerHTML = `${ITEMS[id].emo}<span class="qt">${qtyTag(L,id)}</span>`;
+    }
     d.setAttribute("role","img");
     d.setAttribute("aria-label", nameQty(L,id));
     strip.appendChild(d);
@@ -2163,7 +2268,8 @@ function updateHotspots(){
       cell.classList.add("hot-target");
       // 防禦：萬一 id 唔喺 ITEMS（例如日後加 mode 加漏），唔好成個地圖死機
       const it = ITEMS[id];
-      cell.setAttribute("aria-label", it ? `貨架：${it.name}` : "貨架");
+      // ⚠️ 小學用簡單名（"豆腐" 而唔係 "正方形豆腐盒"）
+      cell.setAttribute("aria-label", it ? `貨架：${smallName(id)}` : "貨架");
     }else{
       cell.setAttribute("aria-label", "貨架（空）");
     }
@@ -2181,7 +2287,7 @@ function updateHotspots(){
   if(btn){
     if(h?.type==="shelf" && h.id){
       const sh = shapeOf(h.id);
-      const lab = ITEMS[h.id].name;
+      const lab = smallName(h.id);
       btn.innerHTML = `<span class="ico">🛒</span> 攞 ${lab}`;
     }
     else if(h?.type==="shelf") btn.innerHTML = `<span class="ico">📦</span> 空貨架`;
@@ -2198,7 +2304,24 @@ function renderMap(){
      如果照 listIds() 攞，會將 "circle"/"triangle" 塞入 shelfItems，
      然後 ITEMS["circle"] → undefined → 成個地圖 render 死機。
      形狀 mode 全部實物都喺貨架，所以淨係擺 shelfIds()。 */
-  const ids = isShapeMode() ? shelfIds(L) : listIds(L).concat(shelfIds(L));
+  let ids;
+  if(isShapeMode()){
+    ids = shelfIds(L);
+  }else if(isPrimaryMode()){
+    /* ⚠ 小學高卡：清單寫「曲奇 ×2」→ 架上真係要擺 2 件曲奇，
+       否則學生永遠攞唔夠件數（籃度一件都冇多）。
+       ⚠️ 中學·數 mode 唔可以咁做 —— 嗰個 mode 嘅設計係
+       「架上 1 件 + 學生自己答數字」，改成真係擺 3 件會改變咗既有行為。 */
+    ids = [];
+    L.items.forEach(it=>{
+      const id = typeof it === "string" ? it : it.id;
+      const q = listQty(L, id);
+      for(let k=0;k<q;k++) ids.push(id);
+    });
+    ids = ids.concat(shelfIds(L));
+  }else{
+    ids = listIds(L).concat(shelfIds(L));
+  }
   // assign up to shelf slots
   shelfItems = SHELF_SLOTS.map((_,i)=> ids[i] || null);
   player.x = 5; player.y = 5; player.facing = DIR_DOWN;
@@ -2212,6 +2335,8 @@ function renderMap(){
     ? "形狀購物！睇住 ●▲■ 要幾多，行去貨架揀啱形，唔好手多多。"
     : isQtyMode()
     ? "歡迎光臨 PIXEL MART！睇住清單上面嘅數量，行去貨架數清楚件數先攞。"
+    : isPrimaryMode()
+    ? "歡迎光臨 PIXEL MART！睇住清單上面嘅相片，行去貨架搵返一樣嘅嘢。"
     : "歡迎光臨 PIXEL MART！睇住清單，行去貨架攞嘢，再去櫃檯付足錢。", "happy");
 }
 
@@ -2222,9 +2347,21 @@ function pickItemFromMap(id, shelfIndex, n){
     beep([300]); say("籃度已經裝滿晒喇。","think"); return;
   }
   const q = (n && n > 1) ? n : 1;
-  if(!state.basket.includes(id)) state.basket.push(id);
-  state.basketN[id] = q;
-  state.basketFrom[id] = shelfIndex;   // 記住攞自邊個架位（放返低要用）
+  if(state.basket.includes(id)){
+    /* ⚠️ 同一款再攞多一件 → 件數累加（小學高卡：清單「曲奇 ×2」，
+       架上真係擺咗 2 件，學生要逐件攞）。
+       ⚠️ 唔可以覆蓋成 q —— 咁第二次攞會將件數打回 1。 */
+    state.basketN[id] = (state.basketN[id] || 1) + q;
+    state.basketFrom[id] = shelfIndex;
+  }else{
+    state.basket.push(id);
+    state.basketN[id] = q;
+    state.basketFrom[id] = shelfIndex;   // 記住攞自邊個架位（放返低要用）
+  }
+  /* 每件貨記低自己嘅架位：小學高卡同一款有 2 件，
+     放返低時要放返去對應嗰個位，唔可以全部撞埋一格。 */
+  if(!state.basketSlots[id]) state.basketSlots[id] = [];
+  state.basketSlots[id].push(shelfIndex);
   shelfItems[shelfIndex] = null;
   SFX.tap();
   renderBasket();
@@ -2235,7 +2372,9 @@ function pickItemFromMap(id, shelfIndex, n){
     const sh = shapeOf(id);
     qtyTxt = `${ITEMS[id].name}${SHAPE_MARK[sh]||""}`;
   }else{
-    qtyTxt = (q > 1) ? `${ITEMS[id].name} ${q} 件` : ITEMS[id].name;
+    /* 用累加後嘅總件數（高卡攞咗第 2 件曲奇 → 應該講「2 件」） */
+    const tot = state.basketN[id] || 1;
+    qtyTxt = (tot > 1) ? `${smallName(id)} ${tot} 件` : smallName(id);
   }
   say(n2===1 ? `攞咗 ${qtyTxt}。` : `攞咗 ${qtyTxt}。籃度有 ${n2} 樣。`, "neutral");
 }
@@ -2251,14 +2390,23 @@ function putBack(id){
   if(!onMapScreen()) return;
   const i = state.basket.indexOf(id);
   if(i < 0) return;
-  const idx = state.basketFrom[id];
-  state.basket.splice(i,1);
-  delete state.basketN[id];
-  delete state.basketFrom[id];
+  const slots = state.basketSlots[id] || [];
+  const idx = slots.length ? slots.pop() : state.basketFrom[id];
+  const n = state.basketN[id] || 1;
+  if(n > 1){
+    /* ⚠️ 同一款仲有其他件 → 只減 1 件（唔係成款拎走）。
+       舊版直接 delete basketN[id] → 由 2 件變 0 件，唔啱。 */
+    state.basketN[id] = n - 1;
+  }else{
+    state.basket.splice(i,1);
+    delete state.basketN[id];
+    delete state.basketFrom[id];
+    delete state.basketSlots[id];
+  }
   if(idx != null && shelfItems[idx] == null) shelfItems[idx] = id;
   SFX.tap();
   renderBasket(); updateHotspots();
-  say(`放返低${ITEMS[id].name}。再搵清楚啲。`, "neutral");
+  say(`放返低${smallName(id)}。再搵清楚啲。`, "neutral");
 }
 
 /* ============================================================
@@ -2271,6 +2419,16 @@ function putBack(id){
      • 誠信主關仍然喺櫃檯三選；拍卡只係令「付款」變真實，唔係自動扣錢
      • 星仍然只獎「付足」
    ============================================================ */
+/* 電子付款流程（掃描 → 拍卡 → 收據）
+   中學要求 5「體驗無人商店的購物及電子付款流程」
+   小學要求 4「體驗無人商店的購物及電子付款流程」
+   → 三個 mode 全部都要有。
+   （將來如果加 mode 唔想要電子付款，喺 MODES 加 `epay:false` 就得。） */
+function hasEPay(){
+  const M = MODES[state.mode];
+  return !M || M.epay !== false;
+}
+/* 中學專屬：形狀 badge、雙星、證狀步驟措辭 */
 function isMiddle(){ return isQtyMode() || isShapeMode(); }
 function priceOf(id){ return (ITEMS[id] && ITEMS[id].price) || 0; }
 function money(n){ return "$" + n; }
@@ -2310,11 +2468,15 @@ function renderScan(){
     row.className = "scan-item" + (done ? " done" : "");
     const pic = document.createElement("div");
     pic.className = "si-pic";
-    pic.innerHTML = itemPicHTML(id);
+    /* ⚠️ 小學：掃描畫面用「實物」emoji（唔用相片、唔用形狀 badge）
+       —— 掃描呢個動作本身就係「搵返架上嗰件實物」。 */
+    pic.innerHTML = isPrimaryMode()
+      ? `<span class="si-emo">${ITEMS[id].emo||""}</span>`
+      : itemPicHTML(id);
     const txt = document.createElement("div");
     txt.className = "si-txt";
-    const sh = shapeOf(id);
-    txt.innerHTML = `${ITEMS[id].name}${sh ? ` ${SHAPE_MARK[sh]}` : ""}`
+    const sh = isShapeMode() ? shapeOf(id) : null;
+    txt.innerHTML = `${smallName(id)}${sh ? ` ${SHAPE_MARK[sh]}` : ""}`
                   + (n > 1 ? ` <span class="si-q">× ${n} 件</span>` : "");
     const pr = document.createElement("div");
     pr.className = "si-price";
@@ -2324,7 +2486,7 @@ function renderScan(){
     btn.className = "si-btn";
     btn.textContent = done ? "✓ 已掃描" : "📷 掃描";
     btn.disabled = done;
-    btn.setAttribute("aria-label", `掃描 ${ITEMS[id].name}`);
+    btn.setAttribute("aria-label", `掃描 ${smallName(id)}`);
     btn.addEventListener("click", ()=>scanOne(id));
     row.appendChild(pic); row.appendChild(txt); row.appendChild(pr); row.appendChild(btn);
     box.appendChild(row);
@@ -2340,9 +2502,9 @@ function renderScan(){
     got.innerHTML = ["circle","triangle","square","rect"].filter(k=>g[k])
       .map(k=>`${SHAPE_MARK[k]} × ${g[k]}`).join("　") || "—";
   }else{
-    want.innerHTML = listIds(L).map(id=>`${ITEMS[id].name} × ${listQty(L,id)}`).join("　") || "—";
+    want.innerHTML = listIds(L).map(id=>`${smallName(id)} × ${listQty(L,id)}`).join("　") || "—";
     got.innerHTML = state.basket.filter(id=>state.scanned[id])
-      .map(id=>`${ITEMS[id].name} × ${state.basketN[id]||1}`).join("　") || "—";
+      .map(id=>`${smallName(id)} × ${state.basketN[id]||1}`).join("　") || "—";
   }
 
   const total = state.basket.length;
@@ -2362,7 +2524,7 @@ function scanOne(id){
   SFX.tap();
   renderScan();
   const n = state.basketN[id] || 1;
-  say(`掃咗${ITEMS[id].name}，${money(priceOf(id)*n)}。`, "neutral");
+  say(`掃咗${smallName(id)}，${money(priceOf(id)*n)}。`, "neutral");
 }
 
 function doInteract(){
@@ -2512,7 +2674,7 @@ function renderBasket(){
     el.className = "bitem";
     if(canUndo){
       el.type = "button";
-      el.setAttribute("aria-label", `放返低 ${ITEMS[id].name}`);
+      el.setAttribute("aria-label", `放返低 ${smallName(id)}`);
       el.title = "放返低";
       el.addEventListener("click", ()=>putBack(id));
     }
@@ -2525,8 +2687,9 @@ function renderBasket(){
         : `<span>${ITEMS[id].emo||""}</span>`;
       el.setAttribute("aria-label", canUndo ? `放返低 ${ITEMS[id].name}` : ITEMS[id].name);
     }else{
-      el.innerHTML = `${ITEMS[id].emo}<span class="qt">${(isQtyMode() && n>1) ? "×"+n : ""}</span>`;
-      el.setAttribute("aria-label", canUndo ? `放返低 ${ITEMS[id].name} ${n} 件` : `${ITEMS[id].name} ${n} 件`);
+      /* ⚠️ 件數要喺任何 mode 都顯示（小學高卡 ×2、中學·數 ×3） */
+      el.innerHTML = `${ITEMS[id].emo}<span class="qt">${(n>1) ? "×"+n : ""}</span>`;
+      el.setAttribute("aria-label", canUndo ? `放返低 ${smallName(id)} ${n} 件` : `${smallName(id)} ${n} 件`);
     }
     if(canUndo){
       const u = document.createElement("span");
@@ -2549,7 +2712,11 @@ function renderBasket(){
     if(g.rect) parts.push("▬"+g.rect);
     $("#basketCap").textContent = parts.length ? ("籃：" + parts.join(" ")) : "籃度未有嘢";
   }else{
-    $("#basketCap").textContent = n ? `籃度有 ${n} 樣嘢` : "籃度未有嘢";
+    /* ⚠️ 件數要計（高卡曲奇 ×2 → 籃度有 1 樣、共 2 件） */
+    const tot = state.basket.reduce((a,id)=> a + (state.basketN[id]||1), 0);
+    $("#basketCap").textContent = n
+      ? (tot > n ? `籃度有 ${n} 樣嘢，共 ${tot} 件` : `籃度有 ${n} 樣嘢`)
+      : "籃度未有嘢";
   }
 }
 
@@ -2577,7 +2744,16 @@ function renderCheck(){
     wanted.forEach(id=>{
       const d = document.createElement("div");
       d.className = "mini";
-      d.innerHTML = `${ITEMS[id].emo}<span class="qt">${qtyTag(L,id)}</span>`;
+      /* ⚠️ 小學：清單欄要同門口 / 清單常駐條同一套呈現
+         （初/中＝商品相片、高＝名+數量），否則三個地方對唔上。 */
+      if(isPrimaryMode() && L.pic === "list"){
+        d.classList.add("pic-cell");
+        d.innerHTML = itemPicHTML(id,"",true);
+      }else if(isPrimaryMode() && L.pic === "name"){
+        d.innerHTML = `${ITEMS[id].emo}<span class="qt">${qtyTag(L,id)}</span><span class="nm">${smallName(id)}</span>`;
+      }else{
+        d.innerHTML = `${ITEMS[id].emo}<span class="qt">${qtyTag(L,id)}</span>`;
+      }
       d.setAttribute("role", "img");
       d.setAttribute("aria-label", nameQty(L, id));
       cl.appendChild(d);
@@ -2601,8 +2777,8 @@ function renderCheck(){
         b.innerHTML = itemPicHTML(id);
         b.setAttribute("aria-label", ITEMS[id].name);
       }else{
-        b.innerHTML = `${ITEMS[id].emo}<span class="qt">${(isQtyMode() && n>1) ? "×"+n : ""}</span>`;
-        b.setAttribute("aria-label", `${ITEMS[id].name} ${n} 件`);
+        b.innerHTML = `${ITEMS[id].emo}<span class="qt">${(n>1) ? "×"+n : ""}</span>`;
+        b.setAttribute("aria-label", `${smallName(id)} ${n} 件`);
       }
       b.addEventListener("click", ()=>onCheckTap(i));
       cb.appendChild(b);
@@ -2743,7 +2919,7 @@ function diffSentence(r){
     return "形同數量都跟單。";
   }
   if(!isQtyMode()){
-    const n = (ids)=> ids.map(i=>ITEMS[i].name).join("、");
+    const n = (ids)=> ids.map(i=>smallName(i)).join("、");
     if(r.missing.length && r.extra.length)
       return `漏咗 ${n(r.missing)}，多咗 ${n(r.extra)}。`;
     if(r.missing.length)
@@ -2752,10 +2928,10 @@ function diffSentence(r){
       return `多咗 ${n(r.extra)}。`;
     return "同清單一樣。";
   }
-  const nmWant  = (id)=> `${ITEMS[id].name}（要 ${r.wantN[id]} 件，攞咗 ${r.gotN[id] || 0} 件）`;
+  const nmWant  = (id)=> `${smallName(id)}（要 ${r.wantN[id]} 件，攞咗 ${r.gotN[id] || 0} 件）`;
   // extra（干擾項）根本唔喺清單，r.wantN[id] 係 undefined，
   // 所以呢支一定要用自己嘅講法，唔可以 reuse nmWant。
-  const nmExtra = (id)=> `${ITEMS[id].name}（清單冇呢樣，攞咗 ${r.gotN[id] || 0} 件）`;
+  const nmExtra = (id)=> `${smallName(id)}（清單冇呢樣，攞咗 ${r.gotN[id] || 0} 件）`;
   if(r.missing.length && r.extra.length)
     return `${r.missing.map(nmWant).join("、")} 唔啱，多咗 ${r.extra.map(nmExtra).join("、")}。`;
   if(r.missing.length)
@@ -2775,7 +2951,7 @@ function declare(ans){
   SFX.tap();
   // 中學 mode：中間加多一步「掃描商品 + 核對數量及價格」
   // ⚠ 掃描喺對貨之後 → 掃描畫面唔會洩漏「啱定錯」（教學紅線）
-  if(isMiddle()){
+  if(hasEPay()){
     state.scanned = {};
     renderScan();
     go("scan");
@@ -2789,7 +2965,7 @@ function declare(ans){
 
 /* 櫃檯畫面：中學 mode 加電子錢包 + 金額；小學 mode 保持原樣 */
 function preparePay(){
-  const mid = isMiddle();
+  const mid = hasEPay();
   $("#pbScanStep").hidden = !mid;
   $("#pbArrow2").hidden = !mid;
   $("#pbIco3").textContent = mid ? "💳" : "💰";
@@ -2867,13 +3043,13 @@ function pay(choice){
         const sh = shapeOf(id);
         return `${ITEMS[id].emo}${SHAPE_MARK[sh]||""}`;
       }).join(" ") || "（空籃）"
-    : state.basket.map(id=>`${ITEMS[id].name}${(isQtyMode() && (state.basketN[id]||1)>1) ? ` ${state.basketN[id]} 件` : ""}`).join("、") || "（空籃）";
+    : state.basket.map(id=>`${smallName(id)}${((state.basketN[id]||1)>1) ? ` ${state.basketN[id]} 件` : ""}`).join("、") || "（空籃）";
   const missLabel = isShapeMode()
     ? r.missing.map(k=>`${SHAPE_MARK[k]}${SHAPE_NAME[k]}（要${r.wantN[k]}攞${r.gotN[k]||0}）`).join("、") || "—"
-    : r.missing.map(id=>isQtyMode() ? `${ITEMS[id].name}（要 ${r.wantN[id]}，攞咗 ${r.gotN[id]||0}）` : ITEMS[id].name).join("、") || "—";
+    : r.missing.map(id=>`${smallName(id)}（要 ${r.wantN[id]}，攞咗 ${r.gotN[id]||0}）`).join("、") || "—";
   const extraLabel = isShapeMode()
     ? r.extra.map(k=>`${SHAPE_MARK[k]}${SHAPE_NAME[k]}`).join("、") || "—"
-    : r.extra.map(id=>ITEMS[id].name).join("、") || "—";
+    : r.extra.map(id=>smallName(id)).join("、") || "—";
 
   // 形狀：銀=跟單；金=跟單+比足。其他模式：星=比足（原規則）
   let award = "none";
@@ -2894,10 +3070,10 @@ function pay(choice){
     多咗: extraLabel,
     形狀跟單: isShapeMode() ? (r.allMatch ? "✓ 跟單" : "✗ 未跟單") : "—",
     多取: isShapeMode() ? (r.tookExtra ? "✓ 有多取/干擾" : "無多取") : "—",
-    掃描件數: isMiddle()
+    掃描件數: hasEPay()
       ? `${state.basket.filter(id=>state.scanned[id]).length} / ${state.basket.length} 件`
       : "—",
-    應付金額: isMiddle() ? money(basketTotal()) : "—",
+    應付金額: hasEPay() ? money(basketTotal()) : "—",
     逐項核對: state.checks.length
       ? state.checks.map(c=>{
           const lab = isShapeMode() ? `${ITEMS[c.item].emo}${SHAPE_MARK[shapeOf(c.item)]||""}` : ITEMS[c.item].name;
@@ -2907,7 +3083,7 @@ function pay(choice){
     誠實答覆: state.declareAns==="same" ? "一樣" : "唔一樣",
     實際: r.allMatch ? "一樣" : "唔一樣",
     一致: truthful ? "✓ 對貨誠實" : "✗ 對貨有落差",
-    付費: (isMiddle() ? PAY_LABEL_MID : PAY_LABEL)[choice] || choice,
+    付費: (hasEPay() ? PAY_LABEL_MID : PAY_LABEL)[choice] || choice,
     付足: paidFull ? "✓ 付足" : "✗ 未付足",
     獎: award === "gold" ? "⭐金" : award === "silver" ? "🥈銀" : "—",
   });
@@ -2929,11 +3105,18 @@ function pay(choice){
   $("#btnNext").textContent = (state.listIndex >= LISTS.length-1) ? "睇我嘅獎狀 🏅" : "下一張清單";
   paintResult();
   // 中學 mode：先出收據（「確認已完成付款」），撳「好」先入結果畫面
-  if(isMiddle()){
+  if(hasEPay()){
     showReceipt(choice);
     return;
   }
   go("result");
+}
+
+/* 證狀總結句（小學 / 中學唔同措辭，但內容一樣） */
+function certStepsText(){
+  return isPrimaryMode()
+    ? "冇售貨員 · 自己搵商品 · 逐件掃描 · 嘟卡付錢<br>冇人監察都要誠實付款，付咗錢先可以攞走商品。"
+    : "冇售貨員 · 自己搵商品 · 逐件掃描 · 拍卡付錢<br>冇人監察都誠信付款、遵守規則";
 }
 
 /* 結果：貨／錢兩行 + 價值觀金句。
@@ -3003,11 +3186,12 @@ function paintResult(){
   }
 
   t.textContent = title;
-  // 中學 mode：結果畫面用「拍卡」語言（要求 5：電子付款流程）
-  if(isMiddle()){
-    money = money.replace("錢：你付足咗。", "錢：你拍卡付足咗。")
-                 .replace("錢：比少錢，未夠數。", "錢：只畀一半錢，未夠數。")
-                 .replace("錢：唔比錢就走，唔得。", "錢：冇拍卡就攞走，唔得。");
+  // 電子付款語言（小學要求 4 / 中學要求 5 都要講「拍卡」）
+  if(hasEPay()){
+    const pay = isPrimaryMode() ? "嘟卡（拍卡）" : "拍卡";
+    money = money.replace("錢：你付足咗。", `錢：你${pay}付足咗。`)
+                 .replace("錢：比少錢，未夠數。", `錢：只畀一半錢，未夠數。`)
+                 .replace("錢：唔比錢就走，唔得。", `錢：冇${pay}就攞走，唔得。`);
   }
   b.textContent = goods + "\n" + money;
   v.hidden = false;
@@ -3036,7 +3220,7 @@ function armPay(){
 }
 
 function startList(){
-  state.basket = []; state.basketN = {}; state.basketFrom = {}; state.scanned = {}; state.checks = []; state.cursor = 0;
+  state.basket = []; state.basketN = {}; state.basketFrom = {}; state.basketSlots = {}; state.scanned = {}; state.checks = []; state.cursor = 0;
   armDeclare(); armPay();
   $("#rewardStar").style.display = "none"; $("#rewardStar").textContent = "⭐";
   const rv = $("#resultValue"); if(rv){ rv.hidden = true; rv.textContent = ""; }
@@ -3045,7 +3229,7 @@ function startList(){
 
 function resetAll(){
   state.listIndex = 0; state.stars = 0; state.silvers = 0; state.log = [];
-  state.basket = []; state.basketN = {}; state.basketFrom = {}; state.scanned = {}; state.checks = []; state.cursor = 0;
+  state.basket = []; state.basketN = {}; state.basketFrom = {}; state.basketSlots = {}; state.scanned = {}; state.checks = []; state.cursor = 0;
   state.declared = false; state.declareAns = null;
   state.paid = false; state.payChoice = null;
   armDeclare(); armPay();
@@ -3065,7 +3249,8 @@ function nextList(){
       ? Array.from({length:n},()=>"⭐").join(" ")
       : "（今次未有付足星）";
     $("#certName").textContent = $("#nameInput").value.trim() || " ";
-    const csteps = $("#certSteps"); if(csteps) csteps.hidden = !isMiddle();
+    const csteps = $("#certSteps");
+    if(csteps){ csteps.hidden = !hasEPay(); csteps.innerHTML = certStepsText(); }
     go("cert");
     if(isShapeMode()){
       if(state.stars >= LISTS.length){
@@ -3089,7 +3274,7 @@ function nextList(){
        startList() 之前 —— 如果唔喺呢度清，門口會顯示上一單嘅貨
        （「籃度有 3 樣嘢」），而且「放返低」↩ 掣仲喺度但按落冇反應
        （putBack 只喺地圖畫面生效）→ 誤導學生，以為自己已經攞咗嘢。 */
-    state.basket = []; state.basketN = {}; state.basketFrom = {};
+    state.basket = []; state.basketN = {}; state.basketFrom = {}; state.basketSlots = {};
     renderBasket();
     renderDoor(); go("door");
     say("做咗一單喇，仲有 " + (LISTS.length - state.listIndex) + " 張單。", "happy");
@@ -3140,6 +3325,166 @@ function openTeacher(){ $("#teacherOut").textContent = teacherText();
    ============================================================ */
 
 /* ============================================================
+   課堂引入（每個 mode 一套提問）
+   ────────────────────────────────────────────────────────────
+   小學課程要求「引入」提問：
+     ① 圖片中有沒有售貨員？
+     ② 小朋友怎樣買東西？→ 順序圖卡配對 ①拿商品 → ②掃描 → ③拍卡
+     ③ 可以直接把零食放進書包走掉嗎？
+     ④ 要先做什麼動作才可以拿走？要「嘟卡（付款）」還是直接拿走？
+   中學課程要求「引入」提問：3 條（見 INTRO_Q.middle）
+   ⚠ 答案要㩒「睇答案」先展開 —— 唔會自動劇透（教學紅線）
+   ⚠ 順序配對係「練習」：唔影響星星、唔影響誠信判斷、答錯可以再試
+   ============================================================ */
+const INTRO_Q = {
+  primary: [
+    { q:"圖片入面，有冇售貨員？",
+      say:"圖片入面，有沒有售貨員？",
+      a:"冇售貨員。一個人都冇，冇人睇住你。" },
+    { q:"小朋友點樣買嘢？",
+      say:"小朋友怎樣買東西？先拿商品，再掃描，最後拍卡付錢。",
+      a:"先 ①拿商品 → ②掃描 → ③拍卡。<br>下面有 3 張卡，㩒啱次序試下。" },
+    { q:"冇售貨員，可以直接將零食放落書包走掉嗎？",
+      say:"店裡沒有售貨員，可以直接把零食放進書包走掉嗎？",
+      a:"<strong>唔可以。</strong>要先掃描商品、拍卡付錢，付咗先可以攞走。" },
+    { q:"我哋要先做咩動作才可以拿走？要「嘟卡」定係直接拿走？",
+      say:"我們要先做什麼動作才可以拿走？是要嘟卡付款，還是直接拿走？",
+      a:"要 <strong>嘟卡（拍卡）付款</strong>，確認咗先可以攞走。<br>冇人監察都要咁做 —— 咁先叫誠信。" },
+  ],
+  middle: [
+    { q:"圖片入面，有冇售貨員？",
+      say:"圖片入面，有沒有售貨員？",
+      a:"冇售貨員。一個人都冇，冇人睇住你。" },
+    { q:"冇售貨員，我哋要自己做咩？",
+      say:"冇售貨員，我們要自己做什麼？要自己掃描商品，還要自己拍卡付錢。",
+      a:"自己搵商品、自己掃描商品、自己拍卡付錢。<br>冇人幫你，冇人提醒你。" },
+    { q:"攞咗嘢，可以直接放落書包走人嗎？",
+      say:"拿了東西，可以直接放進書包走人嗎？還是要先拍卡付錢才可以拿走？",
+      a:"<strong>唔可以。</strong>要先掃描商品、拍卡付錢，付咗先可以攞走。<br>冇人監察都要咁做 —— 咁先叫誠信。" },
+  ],
+};
+
+/* 順序圖卡配對（小學引入第 2 條嘅活動：①拿商品 → ②掃描 → ③拍卡） */
+const ORDER_CARDS = [
+  { k:"take", n:"①拿商品", emo:"🛒" },
+  { k:"scan", n:"②掃描",   emo:"📷" },
+  { k:"pay",  n:"③拍卡",   emo:"💳" },
+];
+const ORDER_RIGHT = ["take","scan","pay"];
+/* 故意唔係正確次序 —— 否則學生一睇就啱，配對任務冇意義 */
+const ORDER_SHUFFLE = ["scan","take","pay"];
+let orderPicked = [];
+
+function introQuestions(){ return isPrimaryMode() ? INTRO_Q.primary : INTRO_Q.middle; }
+
+function renderIntro(){
+  const box = $("#introList");
+  if(box){
+    box.innerHTML = "";
+    introQuestions().forEach((it,i)=>{
+      const d = document.createElement("div");
+      d.className = "iq";
+      const row = document.createElement("div");
+      row.className = "iq-row";
+      const n = document.createElement("span"); n.className = "iq-n"; n.textContent = String(i+1);
+      const q = document.createElement("span"); q.className = "iq-q"; q.textContent = it.q;
+      const spk = document.createElement("button");
+      spk.type = "button"; spk.className = "spk"; spk.textContent = "🔊";
+      spk.setAttribute("aria-label", "讀出問題");
+      spk.dataset.say = it.say;
+      const a = document.createElement("button");
+      a.type = "button"; a.className = "iq-a"; a.setAttribute("aria-expanded","false");
+      a.textContent = "睇答案";
+      row.appendChild(n); row.appendChild(q); row.appendChild(spk); row.appendChild(a);
+      const ans = document.createElement("div");
+      ans.className = "iq-ans"; ans.hidden = true; ans.innerHTML = it.a;
+      d.appendChild(row); d.appendChild(ans);
+      box.appendChild(d);
+    });
+  }
+  const ob = $("#introOrder");
+  if(ob) ob.hidden = !isPrimaryMode();
+  if(isPrimaryMode()) renderOrderTask();
+}
+
+/* ── 順序圖卡配對 ─────────────────────────────────────────── */
+function orderCardBtn(k){
+  const c = ORDER_CARDS.find(x=>x.k===k);
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "ocard"; b.dataset.key = k;
+  b.innerHTML = `<span class="oe">${c.emo}</span><span class="on">${c.n}</span>`;
+  b.setAttribute("aria-label", `圖卡：${c.n}`);
+  b.addEventListener("click", ()=>pickOrderCard(k));
+  return b;
+}
+function renderOrderTask(){
+  orderPicked = [];
+  const hint = $("#orderHint");
+  if(hint){ hint.textContent = "撳一張卡開始排。"; hint.classList.remove("good","bad"); }
+  renderOrderSlots();
+}
+function renderOrderSlots(){
+  const picks = $("#orderPicks"), slots = $("#orderSlots");
+  if(!picks || !slots) return;
+  picks.innerHTML = ""; slots.innerHTML = "";
+  ORDER_SHUFFLE.forEach(k=>{
+    if(orderPicked.includes(k)) return;
+    picks.appendChild(orderCardBtn(k));
+  });
+  ORDER_RIGHT.forEach((_,i)=>{
+    const s = document.createElement("button");
+    s.type = "button"; s.className = "oslot";
+    const k = orderPicked[i];
+    if(k){
+      const c = ORDER_CARDS.find(x=>x.k===k);
+      s.classList.add("filled");
+      s.innerHTML = `<span class="oe">${c.emo}</span><span class="on">${c.n}</span>`;
+      s.setAttribute("aria-label", `第 ${i+1} 步：${c.n}。撳一下拎走`);
+      s.addEventListener("click", ()=>{
+        orderPicked.splice(i,1); SFX.tap(); renderOrderSlots();
+      });
+    }else{
+      s.textContent = String(i+1);
+      s.disabled = true;
+      s.setAttribute("aria-label", `第 ${i+1} 步（空位）`);
+    }
+    slots.appendChild(s);
+  });
+  const hint = $("#orderHint");
+  if(!hint) return;
+  if(orderPicked.length < ORDER_RIGHT.length){
+    hint.textContent = `已排 ${orderPicked.length} 張，仲有 ${ORDER_RIGHT.length-orderPicked.length} 張未排。`;
+    hint.classList.remove("good","bad");
+    return;
+  }
+  const ok = orderPicked.every((k,i)=>k===ORDER_RIGHT[i]);
+  if(ok){
+    hint.textContent = "✓ 啱晒！先拿商品 → 再掃描 → 最後拍卡。";
+    hint.classList.add("good"); hint.classList.remove("bad");
+    SFX.star();
+    say("啱晒！先拿商品，再掃描，最後拍卡付款。","happy");
+    $$("#orderPicks .ocard").forEach(b=>b.disabled = true);
+  }else{
+    // ⚠ 順序：一定要先 renderOrderSlots()（佢會用「已排 N 張」覆蓋 hint），
+    //    否則錯誤提示會喺同一個 tick 被洗走 → 學生永遠睇唔到「次序未啱」。
+    beep([240]);
+    orderPicked = [];
+    renderOrderSlots();
+    const h2 = $("#orderHint");
+    if(h2){
+      h2.textContent = "次序未啱。正確次序係 ①拿商品 → ②掃描 → ③拍卡。再試吓。";
+      h2.classList.add("bad"); h2.classList.remove("good");
+    }
+  }
+}
+function pickOrderCard(k){
+  if(orderPicked.includes(k)) return;
+  orderPicked.push(k);
+  SFX.tap();
+  renderOrderSlots();
+}
+
+/* ============================================================
    事件
    ============================================================ */
 function startMode(m){
@@ -3148,7 +3493,7 @@ function startMode(m){
   setMode(m);
   renderStars();
   // 中學 mode：先做「課堂引入」（中學課程要求嘅引入討論），再入去買嘢
-  if(isMiddle()){
+  if(hasEPay()){
     introFrom = "door";
     go("intro");
     say("先傾一傾：無人商店係咩。", "happy");
@@ -3166,8 +3511,9 @@ $("#btnModePrimary").addEventListener("click", ()=>startMode("primary"));
 $("#btnModeSecondary").addEventListener("click", ()=>startMode("secondary"));
 $("#btnModeShape").addEventListener("click", ()=>startMode("shape"));
 
-/* ── 課堂引入（中學課程要求「引入」討論）─────────────
-   老師帶全班傾 3 條問題；答案要㩒「睇答案」先展開（唔會自動劇透）。 */
+/* ── 課堂引入（課程要求「引入」討論）─────────────
+   老師帶全班傾幾條問題；答案要㩒「睇答案」先展開（唔會自動劇透）。
+   ⚠ #introList 係 JS 動態生成 → 事件要用 delegation（$(".iq-a") 會搵唔到）。 */
 $("#btnIntroOpen").addEventListener("click", ()=>{
   unlockYueSpeech(); SFX.tap();
   introFrom = "cover";
@@ -3180,24 +3526,25 @@ function leaveIntro(){
 }
 $("#btnIntroGo").addEventListener("click", leaveIntro);
 $("#btnIntroSkip").addEventListener("click", leaveIntro);
-$$(".iq-a").forEach(b=>{
-  b.addEventListener("click", ()=>{
+$("#introList").addEventListener("click", (e)=>{
+  const a = e.target.closest(".iq-a");
+  if(a){
     SFX.tap();
     // ⚠ 用 closest(".iq")，唔可以用 parentElement ——
     //   掣嘅 parent 係 .iq-row（同一行），答案係 .iq-row 嘅兄弟（.iq 下面）
-    const ans = b.closest(".iq").querySelector(".iq-ans");
+    const ans = a.closest(".iq").querySelector(".iq-ans");
     const on = ans.hidden;
     ans.hidden = !on;
-    b.classList.toggle("on", on);
-    b.setAttribute("aria-expanded", on ? "true" : "false");
-    b.textContent = on ? "收起答案" : "睇答案";
-  });
-});
-$$(".spk").forEach(b=>{
-  b.addEventListener("click", ()=>{
+    a.classList.toggle("on", on);
+    a.setAttribute("aria-expanded", on ? "true" : "false");
+    a.textContent = on ? "收起答案" : "睇答案";
+    return;
+  }
+  const spk = e.target.closest(".spk");
+  if(spk){
     unlockYueSpeech(); SFX.tap();
-    say(b.dataset.say, "neutral");
-  });
+    say(spk.dataset.say || "", "neutral");
+  }
 });
 
 /* ── 中學 mode：掃描枱 → 拍卡 → 收據 ─────────────── */
