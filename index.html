@@ -1302,6 +1302,20 @@ const ITEMS = {
   s3:{emo:"🧈", name:"正方形豆腐盒", sname:"豆腐",   shape:"square",   price:2, img:"assets/shape/s3-tofu.jpg"},
   r1:{emo:"🧃", name:"長方形果汁盒", sname:"果汁",   shape:"rect",     price:2, img:"assets/shape/r1-juice.jpg"},
   r2:{emo:"🥛", name:"長方形牛奶盒", sname:"牛奶",   shape:"rect",     price:3, img:"assets/shape/r2-milk.jpg"},
+  /* 不規則干擾物（2026-11-11 為咗降低「配對圖形」難度而加）
+     問題：架上同一形狀有多款（正方形 s1/s2/s3、圓形 c1/c2/c3、三角形 t1/t2），
+           學生要逐款比較先揀得啱，好容易揀錯、亦容易「多取」。
+     解法：每種清單要嘅形狀，架上只擺「清單需要嗰啲件數」，
+           剩低嘅架位用呢啲明顯唔係 ●▲■▬ 嘅物件填 —— 學生唔會揀錯形狀。
+     • shape:null = 唔參與形狀計數（籃度 caption 只顯示 ●▲■▬）
+     • odd:true   = 攞咗就算「多取干擾」→ 跟單失敗（保住「忍住手」核心）
+     ⚠ 呢部機 image gen 唔用得，冇相片 → 用 emoji + 白底框，統一同相片嘅外觀。 */
+  o1:{emo:"🍌", name:"香蕉",   sname:"香蕉",   shape:null, odd:true, price:2},
+  o2:{emo:"🍆", name:"茄子",   sname:"茄子",   shape:null, odd:true, price:2},
+  o3:{emo:"🌽", name:"粟米",   sname:"粟米",   shape:null, odd:true, price:2},
+  o4:{emo:"🥦", name:"西蘭花", sname:"西蘭花", shape:null, odd:true, price:3},
+  o5:{emo:"🐟", name:"魚",     sname:"魚",     shape:null, odd:true, price:3},
+  o6:{emo:"🧦", name:"襪子",   sname:"襪子",   shape:null, odd:true, price:2},
 };
 
 /* 形狀清單展示用代表圖（需求係 shape×qty，唔綁死某一件） */
@@ -1346,19 +1360,30 @@ const LISTS_SECONDARY = [
 /* ── 中學·形狀購物（2026-11-04 對中學課程要求更新）
    要求 3：學生要能辨認「圓形、三角形及長方形」物件
    → 清單用 ●▲▬；正方形 ■ 改做干擾，逼學生分辨 ■ 同 ▬（兩個都係「方」）
-   中卡：每種都有 1 件餘裕（搵錯咗可以再搵）
-   高卡：多一項 ■ 要，而且架上只有 1 個長方形（搵到就係唯一答案）
-   銀=跟單；金=跟單+比足。形錯≠不誠實。 */
+   ⚠ 2026-11-11 難度調整（用戶投訴：「有相同形狀嘅物件出現，正方形 3 款、
+     三角形 2 款，難度太高去比較，學生會揀錯」）：
+     舊版架上同一形狀擺咗 2–3 款（c1/c2/c3、t1/t2、s1/s2/s3），
+     學生要逐款比較先知邊件啱，仲好容易「多取」→ 跟單失敗。
+     而家：**每種清單要嘅形狀，架上只擺清單需要嗰啲件數**
+     （清單要 ●×2 → 架上就係得 2 個圓形），其餘架位用不規則物件（o1–o6）填。
+     → 每種目標形狀喺架上唯一可辨，學生唔會揀錯形狀。
+     ⚠ 判分唔放寬：攞咗不規則干擾物 = 多取 = 跟單失敗（冇星），
+       「忍住手唔好手多多」呢個核心教學點原封不動。 */
 const LISTS_SHAPE = [
   {
     level:"中",
     shapes:[{shape:"circle",qty:2},{shape:"triangle",qty:1},{shape:"rect",qty:1}],
-    shelf:["c1","c2","c3","t1","t2","r1","r2","s1","s2"],
+    /* 架上 = 清單要嘅件數（●2 ▲1 ▬1）+ 1 個 ■ 干擾（s1）+ 4 個不規則物件
+       ⚠ 保留 s1 係刻意嘅：要求 3 教「分辨正方形 vs 長方形」，
+         得 1 個正方形對 1 個長方形 → 淨係比一次，負擔細但教學點仲喺度。 */
+    shelf:["c1","o1","c2","t1","o2","r1","s1","o3","o4"],
   },
   {
     level:"高",
     shapes:[{shape:"circle",qty:2},{shape:"triangle",qty:1},{shape:"square",qty:1},{shape:"rect",qty:1}],
-    shelf:["c1","c2","c3","t1","t2","r1","s1","s2","s3"],
+    /* 架上 = 清單要嘅件數，一件多都冇（●2 ▲1 ■1 ▬1）+ 4 個不規則干擾
+       → 每種形狀喺架上唯一可辨，學生唔會揀錯、唔會「多取形狀」。 */
+    shelf:["c1","o3","c2","t2","o4","s1","o5","r1","o6"],
   },
 ];
 
@@ -1469,6 +1494,13 @@ function preloadItemImages(){
   });
 }
 
+/* 不規則干擾物（odd:true）＝ 形狀 mode 架上填位用嘅「明顯唔屬於 ●▲■▬」嘅物件。
+   ⚠ 判分一定要另外計：odd 嘅 shape 係 null，basketShapeCounts() 會 skip 佢
+     → 如果唔特別處理，學生攞咗干擾物（香蕉／粟米…）都會「跟單成功」，
+       會直接破壞「忍住手唔好手多多」呢個核心教學點。 */
+function isOddItem(id){ return !!(ITEMS[id] && ITEMS[id].odd); }
+function basketOddIds(){ return state.basket.filter(id=>isOddItem(id)); }
+function basketOddCount(){ return basketOddIds().reduce((a,id)=> a + (state.basketN[id]||1), 0); }
 function basketShapeCounts(){
   const got = {circle:0, triangle:0, square:0, rect:0};
   state.basket.forEach(id=>{
@@ -1501,8 +1533,14 @@ function shapeMatchInfo(list){
       if(g > n) extraShapes.push(k);
     }
   });
-  const tookExtra = extraShapes.length > 0;
-  return { need, got, mathOk, missing, extraShapes, tookExtra };
+  /* ⚠ 2026-11-11：不規則干擾物（odd:true）shape 係 null，
+     上面的形狀計數會完全漏掉佢 → 學生攞咗干擾都會「跟單成功」。
+     所以呢度另外計 odd 件數：odd > 0 = 多取干擾 = 跟單失敗（冇星）。 */
+  const oddIds = basketOddIds();
+  const oddN = basketOddCount();
+  if(oddN > 0) mathOk = false;
+  const tookExtra = extraShapes.length > 0 || oddN > 0;
+  return { need, got, mathOk, missing, extraShapes, oddIds, oddN, tookExtra };
 }
 
 /* 可調參數（老師/developer 喺 console 改都得） */
@@ -1750,7 +1788,7 @@ function renderDoor(){
   const doorHint = document.querySelector("#s-door .hint");
   if(doorHint){
     doorHint.textContent = isShapeMode()
-      ? "中＝3 種形狀（●▲▬）· 高＝4 種形狀（長方形只有一件）· 形錯≠不誠實"
+      ? "中＝3 種形狀（●▲▬）· 高＝4 種形狀（●▲■▬）· 跟清單嘅形狀同數量 · 形錯≠不誠信"
       : isQtyMode()
         ? "中學數量 · 揀完會掃描同拍卡"
         : "初、中睇相片搵實物 · 高睇清單搵相片 · 揀完會掃描同拍卡";
@@ -2023,7 +2061,17 @@ function drawItemEmoji(ctx,id,tx,ty){
       ctx.fillText(SHAPE_MARK[sh]||"", x+TILE-2, y+1);
     }
   }else{
-    ctx.font = `13px ${EMOJI_FONT}`;
+    /* ⚠ 形狀 mode 架上會「相片 + 不規則 emoji」混排：
+       為咗外觀一致，emoji 都要畫白底框（同相片一樣），
+       免得學生以為 emoji 唔算「架上面嘅嘢」。 */
+    if(isShapeMode()){
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(x+1, y+1, TILE-2, TILE-3);
+      ctx.strokeStyle = PAL.k;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x+1, y+1, TILE-2, TILE-3);
+    }
+    ctx.font = `${isShapeMode() ? 11 : 13}px ${EMOJI_FONT}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(ITEMS[id].emo, x + TILE/2, y + 7);
@@ -2332,7 +2380,7 @@ function renderMap(){
   renderBasket();
   startMapLoop();
   say(isShapeMode()
-    ? "形狀購物！睇住 ●▲■ 要幾多，行去貨架揀啱形，唔好手多多。"
+    ? "形狀購物！睇住清單要嘅形狀同數量，行去貨架揀啱形，唔好手多多。"
     : isQtyMode()
     ? "歡迎光臨 PIXEL MART！睇住清單上面嘅數量，行去貨架數清楚件數先攞。"
     : isPrimaryMode()
@@ -2499,8 +2547,12 @@ function renderScan(){
     want.innerHTML = ["circle","triangle","square","rect"].filter(k=>need[k])
       .map(k=>`${SHAPE_MARK[k]} × ${need[k]}`).join("　") || "—";
     const g = scannedShapeCounts();
-    got.innerHTML = ["circle","triangle","square","rect"].filter(k=>g[k])
-      .map(k=>`${SHAPE_MARK[k]} × ${g[k]}`).join("　") || "—";
+    const gParts = ["circle","triangle","square","rect"].filter(k=>g[k])
+      .map(k=>`${SHAPE_MARK[k]} × ${g[k]}`);
+    /* 不規則干擾物（odd）掃咗都要見到，否則兩欄數量對唔上（學生會以為漏掃） */
+    state.basket.filter(id=>state.scanned[id] && isOddItem(id))
+      .forEach(id=>gParts.push(`${ITEMS[id].emo} × ${state.basketN[id]||1}`));
+    got.innerHTML = gParts.join("　") || "—";
   }else{
     want.innerHTML = listIds(L).map(id=>`${smallName(id)} × ${listQty(L,id)}`).join("　") || "—";
     got.innerHTML = state.basket.filter(id=>state.scanned[id])
@@ -2710,6 +2762,9 @@ function renderBasket(){
     if(g.triangle) parts.push("▲"+g.triangle);
     if(g.square) parts.push("■"+g.square);
     if(g.rect) parts.push("▬"+g.rect);
+    /* 不規則干擾物：籃度 caption 一樣要顯示（emoji），
+       否則學生見到籃度有嘢，但 caption 淨係講形狀 → 對唔上。 */
+    basketOddIds().forEach(id=>parts.push(ITEMS[id].emo));
     $("#basketCap").textContent = parts.length ? ("籃：" + parts.join(" ")) : "籃度未有嘢";
   }else{
     /* ⚠️ 件數要計（高卡曲奇 ×2 → 籃度有 1 樣、共 2 件） */
@@ -2825,8 +2880,12 @@ function onCheckTap(i){
   $("#zoom").classList.add("show");
   $("#checkCtl").style.display = "";
   $("#btnCheckDone").style.display = "none";
-  say(isShapeMode()
+  const sh = shapeOf(id);
+  say(isShapeMode() && sh
     ? "呢個係咩形？清單要唔要呢個形？"
+    : isShapeMode()
+    /* 干擾物（odd）唔係形狀 → 唔好問「咩形」，改問「清單要唔要」（中性，唔洩漏對錯） */
+    ? "呢個嘢，清單上面要唔要？"
     : isQtyMode()
     ? `呢個嘢，清單上面要幾多件？數吓你攞咗幾多件。`
     : "呢個嘢，清單上面有冇？", "think");
@@ -2886,6 +2945,7 @@ function judge(){
       gotN  : info.got,
       missing : info.missing,
       extra : info.extraShapes,
+      extraOdd : info.oddIds,
       tookExtra : info.tookExtra,
       shapeMode : true,
     };
@@ -2912,11 +2972,14 @@ function diffSentence(r){
   if(r.shapeMode){
     const nm = (k)=> `${SHAPE_MARK[k]||""}${SHAPE_NAME[k]||k}（要 ${r.wantN[k]||0}，攞 ${r.gotN[k]||0}）`;
     const nx = (k)=> `${SHAPE_MARK[k]||""}${SHAPE_NAME[k]||k}（多咗）`;
-    if(r.missing.length && r.extra.length)
-      return r.missing.map(nm).join("、") + "；" + r.extra.map(nx).join("、") + "。";
-    if(r.missing.length) return r.missing.map(nm).join("、") + "。";
-    if(r.extra.length) return "多咗 " + r.extra.map(nx).join("、") + "。";
-    return "形同數量都跟單。";
+    /* ⚠ 不規則干擾物（odd）：清單根本冇呢啲形狀 →
+       一定要講明「多咗 X」，唔可以靜靜當冇事（學生要知點解冇星）。 */
+    const oddTxt = (r.extraOdd||[]).map(id=>`${ITEMS[id].emo}${ITEMS[id].name}`).join("、");
+    const parts = [];
+    if(r.missing.length) parts.push(r.missing.map(nm).join("、"));
+    if(r.extra.length)   parts.push(r.extra.map(nx).join("、"));
+    if(oddTxt)           parts.push("多咗 " + oddTxt);
+    return parts.length ? parts.join("；") + "。" : "形同數量都跟單。";
   }
   if(!isQtyMode()){
     const n = (ids)=> ids.map(i=>smallName(i)).join("、");
@@ -3041,14 +3104,18 @@ function pay(choice){
   const gotLabel = isShapeMode()
     ? state.basket.map(id=>{
         const sh = shapeOf(id);
-        return `${ITEMS[id].emo}${SHAPE_MARK[sh]||""}`;
+        /* 干擾物（odd）冇形狀 → 顯示名，唔可以淨係得個 emoji（老師要知係咩嘢） */
+        return sh ? `${ITEMS[id].emo}${SHAPE_MARK[sh]}` : `${ITEMS[id].emo}${ITEMS[id].name}`;
       }).join(" ") || "（空籃）"
     : state.basket.map(id=>`${smallName(id)}${((state.basketN[id]||1)>1) ? ` ${state.basketN[id]} 件` : ""}`).join("、") || "（空籃）";
   const missLabel = isShapeMode()
     ? r.missing.map(k=>`${SHAPE_MARK[k]}${SHAPE_NAME[k]}（要${r.wantN[k]}攞${r.gotN[k]||0}）`).join("、") || "—"
     : r.missing.map(id=>`${smallName(id)}（要 ${r.wantN[id]}，攞咗 ${r.gotN[id]||0}）`).join("、") || "—";
   const extraLabel = isShapeMode()
-    ? r.extra.map(k=>`${SHAPE_MARK[k]}${SHAPE_NAME[k]}`).join("、") || "—"
+    ? [
+        r.extra.map(k=>`${SHAPE_MARK[k]}${SHAPE_NAME[k]}`).join("、"),
+        (r.extraOdd||[]).map(id=>`${ITEMS[id].emo}${ITEMS[id].name}`).join("、")
+      ].filter(Boolean).join("、") || "—"
     : r.extra.map(id=>smallName(id)).join("、") || "—";
 
   // 形狀：銀=跟單；金=跟單+比足。其他模式：星=比足（原規則）
@@ -3133,7 +3200,13 @@ function paintResult(){
   if(r.shapeMode){
     if(r.allMatch) goods = "形：跟單啱晒（形+數）。";
     else goods = "形：" + d + "（呢個係形狀／數量，下次再對。）";
-    if(r.tookExtra) goods += " 有多取／多咗干擾。";
+    /* 干擾物（odd）→ 講「忍住手」；淨係係多咗形狀 → 講「有多取」。
+       兩者唔可以重複講，否則句子會變「多咗 X…有多取／多咗干擾。」咁冗贅。 */
+    if(r.tookExtra){
+      goods += (r.extraOdd||[]).length
+        ? " 忍住手，唔好攞清單冇嘅嘢。"
+        : " 有多取／多咗干擾。";
+    }
   }else if(ans==="diff" && !r.allMatch){
     goods = "貨：你老實講——唔一樣。" + d;
   }else if(ans==="diff" && r.allMatch){
