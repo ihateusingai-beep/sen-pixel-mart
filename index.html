@@ -345,13 +345,17 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
   display:grid; place-items:center;
   font-size:clamp(1.9rem,5vw,2.8rem); line-height:1;
 }
-/* 小學「商品圖片」清單條：相片填滿格仔 */
+/* 小學「商品圖片」清單條：商品圖填滿格仔 */
 #listStrip .ls-dot.ls-pic{ background:#fff; }
 #listStrip .ls-dot.ls-pic .item-pic{ width:clamp(38px,7vw,54px); height:clamp(38px,7vw,54px); border-width:2px; }
 #listStrip .ls-dot .nm{ display:block; font-size:.62rem; font-weight:800; color:#FFF3D6; line-height:1.1; }
 /* ⚠ 清單條底色係深色 → qt 唔可以用 var(--ink)（深色），
    否則「×2」完全睇唔到（.ls-dot .qt 原本就係深色）。 */
 #listStrip .ls-dot .qt{ color:#FFF3D6; font-size:.85em; }
+/* ⚠ 形狀 badge 同 qt 一樣問題：清單條底色係深色，badge 預設跟 --ink（深色）
+   → ●▲■▬ 喺深底睇唔到，而 badge 正正就係中學要求 3 嘅「認形狀」提示。
+   → 同 qt 一樣改成淺色。 */
+#listStrip .ls-dot .shape-badge{ color:#FFF3D6; }
 #s-shop{gap:12px;}
 #s-shop .hint{margin-top:-4px;}
 #s-shop .tiles{gap:12px;}
@@ -407,7 +411,7 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
 .item-pic.lg{ width:clamp(3.2rem,12vw,5rem); height:clamp(3.2rem,12vw,5rem); border-width:3px; }
 .ls-dot .item-pic{ width:2.4rem; height:2.4rem; }
 .mini .item-pic{ width:2.8rem; height:2.8rem; }
-/* 小學「商品圖片」喺核對枱：相片要填滿格仔先睇得清 */
+/* 小學「商品圖片」喺核對枱：商品圖要填滿格仔先睇得清 */
 .mini.pic-cell{ background:#fff; }
 .mini .nm{ font-size:.72rem; font-weight:800; color:var(--ink); margin-left:4px; }
 #bottombar .item-pic{ width:1.9rem; height:1.9rem; border-width:1.5px; }
@@ -416,7 +420,7 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
   font-weight:900; font-size:.85em; margin-left:2px;
 }
 .list-card .dot .item-pic{ width:2.5rem; height:2.5rem; }
-/* 小學「商品圖片」卡：相片係任務主體，要夠大先睇得清 */
+/* 小學「商品圖片」卡：商品圖係任務主體，要夠大先睇得清 */
 .list-card .dot.pic-dot .item-pic{ width:clamp(3rem,13vw,4rem); height:clamp(3rem,13vw,4rem); }
 .list-card .dot.pic-dot{ font-size:clamp(2.1rem,5vw,2.9rem); }
 .list-card .dot .nm{ font-size:.85em; font-weight:800; color:var(--ink); margin-left:4px; }
@@ -945,7 +949,7 @@ p.hint{font-size:clamp(1rem,2.2vw,1.3rem); color:var(--hud); margin:0; text-alig
           <span class="mode-tag">小學·配對</span>
           <span class="mode-ico">🚪</span>
           <span class="mode-name">圖片配對</span>
-          <span class="mode-sub">相片搵實物 · 掃描 · 拍卡</span>
+          <span class="mode-sub">商品圖搵實物 · 掃描 · 拍卡</span>
         </button>
         <button class="big alt mode-btn" id="btnModeSecondary" type="button">
           <span class="mode-tag">中學·數</span>
@@ -1291,17 +1295,21 @@ const ITEMS = {
   egg:     {emo:"🥚", name:"雞蛋",   shape:"circle", price:1},
   orange:  {emo:"🍊", name:"橙",     shape:"circle", price:2},
   chips:   {emo:"🍟", name:"薯片",   shape:"rect",   price:1},
-  /* 形狀購物：超市真實包裝（白底圖）；judge 用 shape 計數 */
-  c1:{emo:"🍪", name:"圓形餅乾盒",   sname:"曲奇",   shape:"circle",   price:3, img:"assets/shape/c1-cookie-tin.jpg"},
-  c2:{emo:"🍪", name:"圓形曲奇罐",   sname:"曲奇",   shape:"circle",   price:4, img:"assets/shape/c2-biscuit-box.jpg"},
-  c3:{emo:"🍮", name:"圓形布甸杯",   sname:"布甸",   shape:"circle",   price:2, img:"assets/shape/c3-pudding-cup.jpg"},
-  t1:{emo:"🍰", name:"三角形蛋糕盒", sname:"蛋糕",   shape:"triangle", price:4, img:"assets/shape/t1-cake-box.jpg"},
-  t2:{emo:"🍙", name:"三角形飯糰",   sname:"飯糰",   shape:"triangle", price:2, img:"assets/shape/t2-onigiri.jpg"},
-  s1:{emo:"🧻", name:"正方形紙巾盒", sname:"紙巾",   shape:"square",   price:2, img:"assets/shape/s1-tissue-box.jpg"},
-  s2:{emo:"🍫", name:"正方形朱古力盒", sname:"朱古力", shape:"square", price:3, img:"assets/shape/s2-choco-box.jpg"},
-  s3:{emo:"🧈", name:"正方形豆腐盒", sname:"豆腐",   shape:"square",   price:2, img:"assets/shape/s3-tofu.jpg"},
-  r1:{emo:"🧃", name:"長方形果汁盒", sname:"果汁",   shape:"rect",     price:2, img:"assets/shape/r1-juice.jpg"},
-  r2:{emo:"🥛", name:"長方形牛奶盒", sname:"牛奶",   shape:"rect",     price:3, img:"assets/shape/r2-milk.jpg"},
+  /* 形狀購物：超市包裝（8-bit pixel 自畫，見下面 SPRITES）。
+     ⚠ 2026-11-11 換走 AI 生成相片（assets/shape/*.jpg 已刪）：
+        相片喺 16px tile 之下變晒形（圓罐睇唔出係圓），又同遊戲嘅
+        8-bit 畫風完全唔夾 → 改成程式自畫嘅 pixel 圖（同一個 14×14 點陣）。
+     judge 仍然用 shape 計數。 */
+  c1:{emo:"🍪", name:"圓形餅乾盒",   sname:"曲奇",   shape:"circle",   price:3},
+  c2:{emo:"🍪", name:"圓形曲奇罐",   sname:"曲奇",   shape:"circle",   price:4},
+  c3:{emo:"🍮", name:"圓形布甸杯",   sname:"布甸",   shape:"circle",   price:2},
+  t1:{emo:"🍰", name:"三角形蛋糕盒", sname:"蛋糕",   shape:"triangle", price:4},
+  t2:{emo:"🍙", name:"三角形飯糰",   sname:"飯糰",   shape:"triangle", price:2},
+  s1:{emo:"🧻", name:"正方形紙巾盒", sname:"紙巾",   shape:"square",   price:2},
+  s2:{emo:"🍫", name:"正方形朱古力盒", sname:"朱古力", shape:"square", price:3},
+  s3:{emo:"🧈", name:"正方形豆腐盒", sname:"豆腐",   shape:"square",   price:2},
+  r1:{emo:"🧃", name:"長方形果汁盒", sname:"果汁",   shape:"rect",     price:2},
+  r2:{emo:"🥛", name:"長方形牛奶盒", sname:"牛奶",   shape:"rect",     price:3},
   /* 不規則干擾物（2026-11-11 為咗降低「配對圖形」難度而加）
      問題：架上同一形狀有多款（正方形 s1/s2/s3、圓形 c1/c2/c3、三角形 t1/t2），
            學生要逐款比較先揀得啱，好容易揀錯、亦容易「多取」。
@@ -1309,7 +1317,8 @@ const ITEMS = {
            剩低嘅架位用呢啲明顯唔係 ●▲■▬ 嘅物件填 —— 學生唔會揀錯形狀。
      • shape:null = 唔參與形狀計數（籃度 caption 只顯示 ●▲■▬）
      • odd:true   = 攞咗就算「多取干擾」→ 跟單失敗（保住「忍住手」核心）
-     ⚠ 呢部機 image gen 唔用得，冇相片 → 用 emoji + 白底框，統一同相片嘅外觀。 */
+     ⚠ 呢部機 image gen 唔用得 → 6 個干擾物全部用同一套 pixel 自畫圖，
+       令 shape mode 架上 100% 同一種畫風（唔會一格係相片一格係 emoji）。 */
   o1:{emo:"🍌", name:"香蕉",   sname:"香蕉",   shape:null, odd:true, price:2},
   o2:{emo:"🍆", name:"茄子",   sname:"茄子",   shape:null, odd:true, price:2},
   o3:{emo:"🌽", name:"粟米",   sname:"粟米",   shape:null, odd:true, price:2},
@@ -1324,16 +1333,16 @@ const SHAPE_REP = { circle:"c1", triangle:"t1", square:"s1", rect:"r1" };
 
 /* ── 小學（2026-11-11 對小學課程要求更新）──────────────────
    要求 3「能配對商品圖片與實物」：
-   • 初、中：清單 = 商品相片 → 貨架 = 實物 emoji → 逐張搵返對應嘅實物
-   • 高：    清單 = 購物清單（名 + ×數量）→ 貨架 = 商品相片 → 搵相片
-   ⚠️ 「相片」同「實物」係兩種唔同呈現，先做到真正嘅配對；
+   • 初、中：清單 = 商品圖（pixel 圖） → 貨架 = 實物 emoji → 逐張搵返對應嘅實物
+   • 高：    清單 = 購物清單（名 + ×數量）→ 貨架 = 商品圖（pixel 圖）→ 搵圖
+   ⚠️ 「圖」同「實物」係兩種唔同呈現，先做到真正嘅配對；
      如果清單同貨架都係同一個符號，就只係「搵返同一樣嘢」，唔算配對。
-   ⚠️ 圖片用現成嘅真實超市包裝相（assets/shape/*.jpg，無文字），
-     貨架用對應嘅日常 emoji 實物符號。
+   ⚠️ 圖片用程式自畫嘅 8-bit pixel 圖（同一個 14×14 點陣，見 SPRITES），
+     貨架用對應嘅日常 emoji 實物符號 —— 兩者呈現唔同先算真正嘅配對。
    ⚠️ c2 唔用（曲奇罐同 c1 餅乾盒都係 🍪，配對會有歧義）。
    pic 欄位 = 呢張卡用邊種呈現：
-     "list" = 清單用相片、貨架用實物
-     "name" = 清單用名+數量、貨架用相片
+     "list" = 清單用商品圖、貨架用實物
+     "name" = 清單用名+數量、貨架用商品圖
    ─────────────────────────────────────────────────────────── */
 const LISTS_PRIMARY = [
   { level:"初", pic:"list",
@@ -1457,43 +1466,45 @@ function nameQty(list, id){
   return smallName(id) + qtyTag(list, id);
 }
 function shapeOf(id){ return (ITEMS[id] && ITEMS[id].shape) || null; }
-function itemImg(id){ return (ITEMS[id] && ITEMS[id].img) || ""; }
 function itemPicHTML(id, cls, noBadge){
   if(!id || !ITEMS[id]) return "";
-  const src = itemImg(id);
   const sh = shapeOf(id);
   /* ⚠️ 小學 mode 唔要形狀 badge：
      小學要求 3 係「配對商品圖片與實物」，badge 會令任務變成「搵形狀」，
      而且形狀對小學要求冇作用（會提前洩漏答案）。 */
   const badge = (noBadge || !sh) ? "" : `<span class="shape-badge" aria-hidden="true">${SHAPE_MARK[sh]||""}</span>`;
   const alt = isPrimaryMode() ? smallName(id) : ITEMS[id].name;
-  if(src){
-    return `<img class="item-pic ${cls||""}" src="${src}" alt="${alt}" loading="eager">${badge}`;
-  }
+  /* ⚠️ 2026-11-11：形狀／干擾商品改用 8-bit pixel 自畫圖（inline SVG），
+     唔再用 AI 生成相片 —— 相片喺細格之下變晒形，又同遊戲嘅 8-bit 畫風唔夾。 */
+  const sp = spriteSVG(id, `item-pic ${cls||""}`.trim(), alt);
+  if(sp) return `${sp}${badge}`;
   return `<span>${ITEMS[id].emo||""}</span>${badge}`;
 }
 function shapeNeedPicHTML(shape, qty){
   const rep = SHAPE_REP[shape];
-  const src = rep && itemImg(rep);
   const mark = SHAPE_MARK[shape]||"";
-  if(src){
-    return `<img class="item-pic" src="${src}" alt="${SHAPE_NAME[shape]||""}" loading="eager"><span class="qt">×${qty}</span><span class="shape-badge">${mark}</span>`;
+  const alt = SHAPE_NAME[shape]||"";
+  const sp = rep ? spriteSVG(rep, "item-pic", alt) : "";
+  if(sp){
+    return `${sp}<span class="qt">×${qty}</span><span class="shape-badge">${mark}</span>`;
   }
   return `${mark}<span class="qt">×${qty}</span>`;
 }
-/* canvas 貨圖 cache */
-const _imgCache = {};
-function preloadItemImages(){
-  Object.keys(ITEMS).forEach(id=>{
-    const src = itemImg(id);
-    if(!src || _imgCache[src]) return;
-    const im = new Image();
-    im.decoding = "async";
-    im.src = src;
-    _imgCache[src] = im;
-  });
+/* ⚠ 商品圖（pixel sprite）喺邊啲位置用？
+   一定要同「貨架上」見到嘅一致 —— 學生喺架上見到紅色餅乾盒，
+   喺籃度／掃描／核對枱就要見到同一張圖，否則會以為「我搵錯嘢」。
+   • 中學·形        ：架上 = pixel 圖 → 籃度／掃描／核對都用 pixel 圖（連形狀 badge）
+   • 小學高（名→圖）：架上 = pixel 圖 → 籃度／掃描／核對都用 pixel 圖（冇形狀 badge）
+   • 小學初／中、中學·數：架上 = 實物 emoji → 籃度／掃描／核對都用 emoji
+   ⚠ 小學要求 3 係「配對商品圖與實物」：初／中卡清單用商品圖、貨架用實物 emoji；
+     高卡清單用名 + 數量、貨架用商品圖 —— 兩個方向都係配對，但呈現唔可以反轉。 */
+function usesPicArt(){ return isShapeMode() || shelfUsesPic(); }
+/* 呢個商品喺「籃度／掃描／核對枱」顯示嘅圖（跟貨架嗰邊）。 */
+function itemArtHTML(id, cls){
+  if(isShapeMode())  return itemPicHTML(id, cls);           // 形狀 badge 保留（中學要求 3）
+  if(shelfUsesPic()) return itemPicHTML(id, cls, true);    // 小學：唔要有形狀 badge
+  return `<span>${ITEMS[id].emo||""}</span>`;
 }
-
 /* 不規則干擾物（odd:true）＝ 形狀 mode 架上填位用嘅「明顯唔屬於 ●▲■▬」嘅物件。
    ⚠ 判分一定要另外計：odd 嘅 shape 係 null，basketShapeCounts() 會 skip 佢
      → 如果唔特別處理，學生攞咗干擾物（香蕉／粟米…）都會「跟單成功」，
@@ -1791,7 +1802,7 @@ function renderDoor(){
       ? "中＝3 種形狀（●▲▬）· 高＝4 種形狀（●▲■▬）· 跟清單嘅形狀同數量 · 形錯≠不誠信"
       : isQtyMode()
         ? "中學數量 · 揀完會掃描同拍卡"
-        : "初、中睇相片搵實物 · 高睇清單搵相片 · 揀完會掃描同拍卡";
+        : "初、中睇商品圖搵實物 · 高睇清單搵商品圖 · 揀完會掃描同拍卡";
   }
   LISTS.forEach((L,i)=>{
     const done = i < state.listIndex;
@@ -1893,6 +1904,339 @@ const PAL = {
   d:"#5EC8E8", D:"#3A9BBF",
 };
 const EMOJI_FONT = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+
+/* ── 8-bit pixel 圖（自畫，唔用 AI 生成相片）─────────────────
+   每個商品 = 14×14 點陣，同遊戲 canvas 一個尺度（tile 16px）。
+   同一個 grid 兩邊用：canvas 用（畫地圖）／DOM 用 inline SVG（清單、核對、籃、掃描）。
+   ═══ 一定要跟遊戲同一個色板 / 同一種畫風，唔好用 AI 生成相片 ═══ */
+const PG = 14;
+
+/* 色板（行貨色，貼近遊戲 PAL） */
+const SP = {
+  k:"#14202B", w:"#F7F7F2", W:"#FFFFFF",
+  red:"#C8553D", redL:"#E0705A", redD:"#8A3B2E",
+  tan:"#F2C48D", tanL:"#F7D9AE", tanD:"#C08F52",
+  brn:"#6B4426", brnL:"#8B5A2B", brnD:"#4A2E19",
+  yel:"#F7D545", yelL:"#FFE97A", yelD:"#C9A21F",
+  blu:"#2F6FD0", bluL:"#5B95E8", bluD:"#1F4C9B",
+  cyn:"#5EC8E8", cynL:"#9BE3F5", cynD:"#3A9BBF",
+  grn:"#4E8C4A", grnL:"#6FB061", grnD:"#3F7439",
+  pur:"#6B3F7A", purL:"#8E5A9E", purD:"#4A2A57",
+  pink:"#E8709B", pinkL:"#F4A0BF", pinkD:"#B84A72",
+  org:"#E88B2E", orgL:"#F6AC5E", orgD:"#B4651A",
+  gry:"#C8CDD6", gryL:"#EDF1F6", gryD:"#8A93A3",
+};
+
+/* ── 點陣工具 ── */
+function gNew(){ return new Array(PG*PG).fill(null); }
+function gIdx(x,y){ return y*PG+x; }
+function gSet(g,x,y,c){ if(x<0||y<0||x>=PG||y>=PG) return; g[gIdx(x,y)] = c; }
+function gGet(g,x,y){ if(x<0||y<0||x>=PG||y>=PG) return null; return g[gIdx(x,y)]; }
+function gRect(g,x,y,w,h,c){ for(let j=0;j<h;j++) for(let i=0;i<w;i++) gSet(g,x+i,y+j,c); }
+function gDisc(g,cx,cy,r,c){
+  for(let y=0;y<PG;y++) for(let x=0;x<PG;x++){
+    const dx=x+0.5-cx, dy=y+0.5-cy;
+    if(dx*dx+dy*dy <= r*r) gSet(g,x,y,c);
+  }
+}
+function gEllipse(g,cx,cy,rx,ry,c){
+  for(let y=0;y<PG;y++) for(let x=0;x<PG;x++){
+    const dx=(x+0.5-cx)/rx, dy=(y+0.5-cy)/ry;
+    if(dx*dx+dy*dy <= 1) gSet(g,x,y,c);
+  }
+}
+function gTri(g,ax,ay,bx,by,cx,cy,c){
+  const minY=Math.min(ay,by,cy), maxY=Math.max(ay,by,cy);
+  for(let y=minY;y<=maxY;y++){
+    const xs=[];
+    const edges=[[ax,ay,bx,by],[bx,by,cx,cy],[cx,cy,ax,ay]];
+    for(const [x0,y0,x1,y1] of edges){
+      if((y0<=y&&y1>y)||(y1<=y&&y0>y)){
+        xs.push(x0+(y-y0)*(x1-x0)/(y1-y0));
+      }
+    }
+    xs.sort((p,q)=>p-q);
+    for(let i=0;i+1<xs.length;i+=2){
+      for(let x=Math.ceil(xs[i]-0.5); x<=Math.floor(xs[i+1]-0.5); x++) gSet(g,x,y,c);
+    }
+  }
+}
+function gLine(g,x0,y0,x1,y1,c){
+  let dx=Math.abs(x1-x0), dy=Math.abs(y1-y0);
+  let sx=x0<x1?1:-1, sy=y0<y1?1:-1, err=dx-dy;
+  for(;;){
+    gSet(g,x0,y0,c);
+    if(x0===x1&&y0===y1) break;
+    const e2=2*err;
+    if(e2>-dy){ err-=dy; x0+=sx; }
+    if(e2<dx){ err+=dx; y0+=sy; }
+  }
+}
+function gMask(fn){ const g=gNew(); fn(g); return g; }
+function gClip(g,mask,x,y,w,h,c){
+  for(let j=0;j<h;j++) for(let i=0;i<w;i++){
+    const px=x+i, py=y+j;
+    if(gGet(mask,px,py)) gSet(g,px,py,c);
+  }
+}
+function gSub(g,mask){ for(let i=0;i<PG*PG;i++) if(mask[i]) g[i]=null; }
+/* 3 tone：左上光、右下影 */
+function gShade(g,light,dark){
+  const base=g.slice();
+  for(let y=0;y<PG;y++) for(let x=0;x<PG;x++){
+    const i=gIdx(x,y); if(!base[i]) continue;
+    const ul = !gGet(base,x-1,y-1) || !gGet(base,x,y-1);
+    const dr = !gGet(base,x+1,y+1) || !gGet(base,x,y+1);
+    if(ul) g[i]=light; else if(dr) g[i]=dark;
+  }
+}
+/* 1px 暗邊（8-bit 慣例） */
+function gEdge(g,c){
+  const base=g.slice();
+  for(let y=0;y<PG;y++) for(let x=0;x<PG;x++){
+    if(base[gIdx(x,y)]) continue;
+    if(gGet(base,x-1,y)||gGet(base,x+1,y)||gGet(base,x,y-1)||gGet(base,x,y+1)) gSet(g,x,y,c);
+  }
+}
+function gRuns(g){
+  const runs=[];
+  for(let y=0;y<PG;y++){
+    let x=0;
+    while(x<PG){
+      const c=g[gIdx(x,y)];
+      if(!c){ x++; continue; }
+      let w=1;
+      while(x+w<PG && g[gIdx(x+w,y)]===c) w++;
+      runs.push({x,y,w,c});
+      x+=w;
+    }
+  }
+  return runs;
+}
+
+/* ── 商品圖（id → 點陣）──────────────────────────────────── */
+const SPRITES = {};
+
+function buildSprites(){
+  /* 圓形：餅乾盒（紅罐 + 銀蓋 + 奶黃label） */
+  {
+    const g=gNew(), m=gMask(gg=>gDisc(gg,7,7,6,"x"));
+    gClip(g,m,0,0,PG,PG,SP.red);
+    gShade(g,SP.redL,SP.redD);
+    gClip(g,m,0,2,PG,3,SP.gry);
+    gClip(g,m,0,2,PG,1,SP.gryL);
+    gClip(g,m,0,4,PG,1,SP.gryD);
+    gClip(g,m,2,7,10,3,SP.tan);
+    gClip(g,m,2,9,10,1,SP.tanD);
+    /* ⚠ label 唔好淨係畫 2 粒點（睇落似一對眼，成個罐變晒表情）。
+       改成一排朱古力粒 → 讀成「餅乾罐」。 */
+    gSet(g,4,8,SP.brn); gSet(g,6,8,SP.brnD);
+    gSet(g,8,8,SP.brn);  gSet(g,10,8,SP.brnD);
+    gEdge(g,SP.k);
+    SPRITES.c1=g;
+  }
+  /* 圓形：曲奇罐（黃蓋 + 玻璃罐 + 深色餅乾） */
+  {
+    const g=gNew(), m=gMask(gg=>gDisc(gg,7,7,6,"x"));
+    gClip(g,m,0,0,PG,PG,SP.tan);
+    gShade(g,SP.tanL,SP.tanD);
+    gClip(g,m,1,3,12,2,SP.gry);
+    gClip(g,m,1,3,12,1,SP.gryL);
+    gClip(g,m,2,7,10,3,SP.brn);
+    gSet(g,4,8,SP.brnL); gSet(g,7,8,SP.brnL); gSet(g,9,9,SP.brnD);
+    gEdge(g,SP.k);
+    SPRITES.c2=g;
+  }
+  /* 圓形：布甸杯（白杯 + 焦糖面 + 車厘荳） */
+  {
+    const g=gNew(), m=gMask(gg=>gDisc(gg,7,8,6,"x"));
+    gClip(g,m,0,0,PG,PG,SP.w);
+    gShade(g,SP.W,SP.gry);
+    gClip(g,m,3,4,8,3,SP.tan);
+    gClip(g,m,3,4,8,1,SP.tanL);
+    gClip(g,m,4,6,6,1,SP.tanD);
+    gSet(g,7,3,SP.red); gSet(g,7,2,SP.brn);
+    gEdge(g,SP.k);
+    SPRITES.c3=g;
+  }
+  /* 三角形：蛋糕盒（粉蛋糕 + 奶油 + 車厘荳） */
+  {
+    const g=gNew(), m=gMask(gg=>gTri(gg,7,1,1,12,13,12,"x"));
+    gClip(g,m,0,0,PG,PG,SP.tan);
+    gShade(g,SP.tanL,SP.tanD);
+    gClip(g,m,0,0,PG,PG,SP.pink);
+    gShade(g,SP.pinkL,SP.pinkD);
+    gClip(g,m,0,0,PG,PG,SP.tan);
+    gShade(g,SP.tanL,SP.tanD);
+    gClip(g,m,0,9,PG,3,SP.w);
+    gSet(g,6,5,SP.red); gSet(g,7,6,SP.redD);
+    gEdge(g,SP.k);
+    SPRITES.t1=g;
+  }
+  /* 三角形：飯糰（白飯 + 海苔） */
+  {
+    const g=gNew(), m=gMask(gg=>gTri(gg,7,1,2,12,12,12,"x"));
+    gClip(g,m,0,0,PG,PG,SP.w);
+    gShade(g,SP.W,SP.gry);
+    gClip(g,m,0,9,PG,3,SP.k);
+    gSet(g,6,3,SP.gryL); gSet(g,7,2,SP.gryL);
+    gEdge(g,SP.k);
+    SPRITES.t2=g;
+  }
+  /* 正方形：紙巾盒（青盒 + 白色紙巾）
+     ⚠ body 一定要係真 9×9：舊版 10×9 睇落似「闊長方形」，
+       同長方形混淆 → 學生分唔出 ■ 同 ▬（教學目標：分辨正方形／長方形）。 */
+  {
+    const g=gNew(), m=gMask(gg=>gRect(gg,2,4,9,9,"x"));
+    gClip(g,m,0,0,PG,PG,SP.cyn);
+    gShade(g,SP.cynL,SP.cynD);
+    /* 紙巾：闊身 + 上面收窄拱起 → 讀成「抽起一張紙巾」，
+       唔好畫成窄長條（會似樽蓋）。 */
+    gRect(g,4,2,6,2,SP.w);
+    gRect(g,5,0,4,2,SP.w);
+    gRect(g,5,0,4,1,SP.gryL);
+    gRect(g,5,7,3,1,SP.w);
+    gEdge(g,SP.k);
+    SPRITES.s1=g;
+  }
+  /* 正方形：朱古力盒（深棕 + 金色直紋）· body 9×9 */
+  {
+    const g=gNew(), m=gMask(gg=>gRect(gg,2,4,9,9,"x"));
+    gClip(g,m,0,0,PG,PG,SP.brn);
+    gShade(g,SP.brnL,SP.brnD);
+    gClip(g,m,4,5,1,7,SP.brnL);
+    gClip(g,m,8,5,1,7,SP.brnL);
+    gRect(g,2,3,9,1,SP.gry);
+    gEdge(g,SP.k);
+    SPRITES.s2=g;
+  }
+  /* 正方形：豆腐盒（白盒 + 綠色標籤）· body 9×9 */
+  {
+    const g=gNew(), m=gMask(gg=>gRect(gg,2,4,9,9,"x"));
+    gClip(g,m,0,0,PG,PG,SP.w);
+    gShade(g,SP.W,SP.gry);
+    gClip(g,m,3,7,7,4,SP.grn);
+    gClip(g,m,4,8,5,2,SP.grnL);
+    gEdge(g,SP.k);
+    SPRITES.s3=g;
+  }
+  /* 長方形：果汁盒（直身窄盒 · 橙盒 + 白label + 紅吸管）
+     ⚠ 形狀：6 闊 × 11 高 → 剪影明顯係「直長方形」，同 9×9 正方形（s1/s2/s3）
+       一眼分得出（中學要求 3：分辨圓形／三角形／正方形／長方形）。
+     ⚠ 方向：一定要「直身」唔好改橫，因為小學 mode 嘅配對係
+       「清單 sprite ↔ 貨架 emoji」：r1 對應 🧃（直身果汁盒）。
+       改成橫長條就會變成一條「橫朱古力」，學生配對唔到。 */
+  {
+    const g=gNew(), m=gMask(gg=>gRect(gg,4,2,6,11,"x"));
+    gClip(g,m,0,0,PG,PG,SP.org);
+    gShade(g,SP.orgL,SP.orgD);
+    gClip(g,m,4,6,6,5,SP.w);
+    gRect(g,5,7,4,1,SP.red);
+    gRect(g,6,8,2,2,SP.org);
+    gRect(g,7,0,2,2,SP.red);
+    gEdge(g,SP.k);
+    SPRITES.r1=g;
+  }
+  /* 長方形：牛奶盒（直身窄盒 · 白盒 + 藍頂）· 同 r1 一致嘅方向
+     ⚠ 小學中卡清單要 r2 → 貨架對應 🥛，所以方向同外型要似「一盒奶」。 */
+  {
+    const g=gNew(), m=gMask(gg=>gRect(gg,4,2,6,11,"x"));
+    gClip(g,m,0,0,PG,PG,SP.w);
+    gShade(g,SP.W,SP.gry);
+    gClip(g,m,4,2,6,3,SP.blu);
+    gRect(g,6,0,2,2,SP.bluD);
+    gClip(g,m,4,8,6,3,SP.bluL);
+    gEdge(g,SP.k);
+    SPRITES.r2=g;
+  }
+  /* 不規則：香蕉（新月） */
+  {
+    const g=gNew();
+    gDisc(g,7,7,6,SP.yel);
+    gDisc(g,10,4,5,null);
+    for(let i=0;i<PG*PG;i++) if(g[i]===null && g[i]===undefined) {}
+    gShade(g,SP.yelL,SP.yelD);
+    gSet(g,3,2,SP.brn); gSet(g,11,11,SP.brn);
+    gEdge(g,SP.k);
+    SPRITES.o1=g;
+  }
+  /* 不規則：茄子（茄形 + 綠蒂） */
+  {
+    const g=gNew();
+    gEllipse(g,6,9,4,5,SP.pur);
+    gTri(g,6,2,3,7,9,7,SP.pur);
+    gShade(g,SP.purL,SP.purD);
+    gRect(g,5,1,3,2,SP.grn);
+    gRect(g,6,0,2,1,SP.grnD);
+    gEdge(g,SP.k);
+    SPRITES.o2=g;
+  }
+  /* 不規則：粟米（黃粒 + 綠殼） */
+  {
+    const g=gNew();
+    gEllipse(g,7,7,4,6,SP.yel);
+    gShade(g,SP.yelL,SP.yelD);
+    for(let y=3;y<=11;y+=2) for(let x=4;x<=9;x+=2) gSet(g,x,y,SP.yelD);
+    gRect(g,6,0,2,2,SP.grn); gRect(g,5,1,4,1,SP.grnD);
+    gEdge(g,SP.k);
+    SPRITES.o3=g;
+  }
+  /* 不規則：西蘭花（花球 + 莖） */
+  {
+    const g=gNew();
+    gRect(g,6,9,3,4,SP.grnD);
+    gDisc(g,4,5,3,SP.grn);
+    gDisc(g,9,4,3,SP.grn);
+    gDisc(g,7,8,3,SP.grn);
+    gShade(g,SP.grnL,SP.grnD);
+    gSet(g,3,4,SP.grnL); gSet(g,8,3,SP.grnL); gSet(g,6,7,SP.grnL);
+    gSet(g,5,6,SP.grnD); gSet(g,10,5,SP.grnD); gSet(g,8,9,SP.grnD);
+    gEdge(g,SP.k);
+    SPRITES.o4=g;
+  }
+  /* 不規則：魚（身 + 尾 + 眼） */
+  {
+    const g=gNew();
+    gEllipse(g,6,7,5,3,SP.cyn);
+    gTri(g,10,7,13,3,13,11,SP.cynD);
+    gShade(g,SP.cynL,SP.cynD);
+    gSet(g,3,6,SP.k);
+    gSet(g,8,8,SP.cynD);
+    gEdge(g,SP.k);
+    SPRITES.o5=g;
+  }
+  /* 不規則：襪（直筒 + 腳 + 條紋） */
+  {
+    const g=gNew();
+    gRect(g,5,2,4,7,SP.w);
+    gRect(g,5,8,7,4,SP.w);
+    gShade(g,SP.W,SP.gry);
+    gRect(g,5,4,4,1,SP.red);
+    gRect(g,9,10,3,2,SP.gryL);
+    gEdge(g,SP.k);
+    SPRITES.o6=g;
+  }
+}
+buildSprites();
+
+/* ── 輸出：runs（canvas + SVG 共用）────────────────────── */
+const SPRITE_RUNS = {};
+for(const id in SPRITES) SPRITE_RUNS[id] = gRuns(SPRITES[id]);
+
+function spriteCanvas(id){
+  if(spriteCanvas._c && spriteCanvas._c[id]) return spriteCanvas._c[id];
+  const runs=SPRITE_RUNS[id]; if(!runs) return null;
+  const cv=document.createElement("canvas"); cv.width=PG; cv.height=PG;
+  const ctx=cv.getContext("2d");
+  for(const r of runs){ ctx.fillStyle=r.c; ctx.fillRect(r.x,r.y,r.w,1); }
+  spriteCanvas._c = spriteCanvas._c || {}; spriteCanvas._c[id]=cv;
+  return cv;
+}
+function spriteSVG(id, cls, alt){
+  const runs=SPRITE_RUNS[id]; if(!runs) return "";
+  const rects = runs.map(r=>`<rect x="${r.x}" y="${r.y}" width="${r.w}" height="1" fill="${r.c}"/>`).join("");
+  return `<svg class="${cls||"item-pic"}" viewBox="0 0 ${PG} ${PG}" shape-rendering="crispEdges" role="img" aria-label="${alt||""}">${rects}</svg>`;
+}
 
 function getCtx(){
   const cv = $("#mapCanvas");
@@ -2026,52 +2370,25 @@ function drawBang(ctx){
   px(ctx,4,oy+6,2,1,"k");
 }
 
-/* 貨架上面嘅嘢用 emoji 畫：特教學生靠樣認嘢，
-   唔好用抽象 pixel 圖案取代（會失去辨識度）。
-   ⚠️ 小學 mode 例外：貨架要按卡顯示「實物 emoji」定「商品相片」
+/* 貨架上面嘅嘢點畫：
+   • 形狀／干擾商品 → 8-bit pixel 自畫圖（sprite，14×14，硬邊唔插值）
+   • 日常商品 → emoji 實物符號（特教學生靠樣認嘢）
+   ⚠️ 小學 mode 例外：貨架要按卡顯示「實物 emoji」定「商品圖」
       （要求 3「配對商品圖片與實物」—— 兩者必須唔同呈現先算配對）。
-   ⚠️ 形狀 badge 只喺形狀 mode 出現：小學唔需要，而且會提前洩漏形狀答案。 */
-function drawItemEmoji(ctx,id,tx,ty){
+   ⚠️ 唔再喺貨架畫形狀 badge：pixel 圖本身已經係圓／三角／方／長方形，
+      badge 會遮住四分之一幅圖，反而令學生睇唔出形狀。 */
+function drawItemArt(ctx,id,tx,ty){
   if(!id || !ITEMS[id]) return;
   const x = tx*TILE, y = ty*TILE;
-  const src = itemImg(id);
-  const im = src ? _imgCache[src] : null;
   const primary = isPrimaryMode();
-  const wantImg = primary ? (shelfUsesPic() && !!src) : (!isQtyMode() && !!src);
-  const wantBadge = !primary && isShapeMode();
+  const useSprite = primary ? shelfUsesPic() : isShapeMode();
+  const sp = useSprite ? spriteCanvas(id) : null;
   ctx.save();
-  if(wantImg && im && im.complete && im.naturalWidth){
-    // 白底小框 + 貨圖（清晰輪廓）
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(x+1, y+1, TILE-2, TILE-3);
-    ctx.strokeStyle = PAL.k;
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x+1, y+1, TILE-2, TILE-3);
-    ctx.imageSmoothingEnabled = true;
-    ctx.drawImage(im, x+2, y+2, TILE-4, TILE-5);
-    // 角標形（只有形狀 mode）
-    const sh = wantBadge ? shapeOf(id) : null;
-    if(sh){
-      ctx.font = "bold 7px sans-serif";
-      ctx.textAlign = "right";
-      ctx.textBaseline = "top";
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(x+TILE-8, y+1, 7, 8);
-      ctx.fillStyle = PAL.k;
-      ctx.fillText(SHAPE_MARK[sh]||"", x+TILE-2, y+1);
-    }
+  if(sp){
+    ctx.imageSmoothingEnabled = false;   // 硬邊，唔好插值（pixel 一定要硬邊）
+    ctx.drawImage(sp, x+1, y+1, PG, PG);
   }else{
-    /* ⚠ 形狀 mode 架上會「相片 + 不規則 emoji」混排：
-       為咗外觀一致，emoji 都要畫白底框（同相片一樣），
-       免得學生以為 emoji 唔算「架上面嘅嘢」。 */
-    if(isShapeMode()){
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(x+1, y+1, TILE-2, TILE-3);
-      ctx.strokeStyle = PAL.k;
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x+1, y+1, TILE-2, TILE-3);
-    }
-    ctx.font = `${isShapeMode() ? 11 : 13}px ${EMOJI_FONT}`;
+    ctx.font = `13px ${EMOJI_FONT}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(ITEMS[id].emo, x + TILE/2, y + 7);
@@ -2096,13 +2413,20 @@ function drawMap(){
       ctx.restore();
     }
   }
-  SHELF_SLOTS.forEach((s,i)=>{ drawItemEmoji(ctx, shelfItems[i], s.x, s.y); });
+  SHELF_SLOTS.forEach((s,i)=>{ drawItemArt(ctx, shelfItems[i], s.x, s.y); });
 
   ctx.save();
   ctx.translate(player.x*TILE, player.y*TILE);
   if(player.facing === DIR_LEFT){ ctx.translate(TILE,0); ctx.scale(-1,1); }
   drawKid(ctx, player.facing, walking ? walkFrame : 0);
   ctx.restore();
+
+  /* ⚠ 玩家企上貨架格度時，16px 高嘅小朋友會把 14×14 嘅商品圖完全遮住 →
+     學生行到格度上面反而「見唔到架上有咩」。
+     小學高卡（清單寫名 → 架上搵圖）會直接搵錯嘢。
+     → 喺小朋友之後重畫嗰格嘅商品：商品永遠見到（小朋友腳仲喺底下露出）。 */
+  const pi = SHELF_SLOTS.findIndex(s => s.x===player.x && s.y===player.y);
+  if(pi >= 0 && shelfItems[pi]) drawItemArt(ctx, shelfItems[pi], player.x, player.y);
 
   // 「！」一定要最後畫：角色行到熱點前面時，標記唔可以被角色蓋住
   const h = hotspotNear(player.x, player.y);
@@ -2384,7 +2708,11 @@ function renderMap(){
     : isQtyMode()
     ? "歡迎光臨 PIXEL MART！睇住清單上面嘅數量，行去貨架數清楚件數先攞。"
     : isPrimaryMode()
-    ? "歡迎光臨 PIXEL MART！睇住清單上面嘅相片，行去貨架搵返一樣嘅嘢。"
+    /* ⚠ 小學高卡清單寫「名 + 數量」、架上先有商品圖 → 語音要反轉，
+       否則會叫學生「睇住清單上面嘅相片」，但高卡清單根本冇相片。 */
+    ? (shelfUsesPic()
+        ? "歡迎光臨 PIXEL MART！睇住清單上面嘅名同數量，行去貨架搵返一樣嘅圖。"
+        : "歡迎光臨 PIXEL MART！睇住清單上面嘅商品圖，行去貨架搵返一樣嘅嘢。")
     : "歡迎光臨 PIXEL MART！睇住清單，行去貨架攞嘢，再去櫃檯付足錢。", "happy");
 }
 
@@ -2516,11 +2844,13 @@ function renderScan(){
     row.className = "scan-item" + (done ? " done" : "");
     const pic = document.createElement("div");
     pic.className = "si-pic";
-    /* ⚠️ 小學：掃描畫面用「實物」emoji（唔用相片、唔用形狀 badge）
-       —— 掃描呢個動作本身就係「搵返架上嗰件實物」。 */
-    pic.innerHTML = isPrimaryMode()
-      ? `<span class="si-emo">${ITEMS[id].emo||""}</span>`
-      : itemPicHTML(id);
+    /* ⚠ 掃描畫面要顯示同貨架上一樣嘅圖：
+       中學·形 / 小學高卡 → 商品圖（pixel）；小學初中、中學·數 → 實物 emoji。
+       ⚠ 2026-11-11：原本小學一律用 emoji，但高卡架上擺嘅係商品圖 →
+         掃描時見到 emoji 會以為搵錯嘢 → 改為跟貨架。 */
+    pic.innerHTML = usesPicArt()
+      ? itemArtHTML(id)
+      : `<span class="si-emo">${ITEMS[id].emo||""}</span>`;
     const txt = document.createElement("div");
     txt.className = "si-txt";
     const sh = isShapeMode() ? shapeOf(id) : null;
@@ -2730,14 +3060,17 @@ function renderBasket(){
       el.title = "放返低";
       el.addEventListener("click", ()=>putBack(id));
     }
-    if(isShapeMode() && sh){
+    if(isShapeMode()){
       // ⚠ 籃底 caption 已經寫「●2 ▲1 ▬1」→ 唔好再掛形狀 badge
       //   （badge 30px 闊，會令籃撐到 4 行，將「清單常駐」條推出畫面 = 踩教學紅線）
-      const src = itemImg(id);
-      el.innerHTML = src
-        ? `<img class="item-pic" src="${src}" alt="${ITEMS[id].name}">`
-        : `<span>${ITEMS[id].emo||""}</span>`;
+      const sp = spriteSVG(id, "item-pic", ITEMS[id].name);
+      el.innerHTML = sp || `<span>${ITEMS[id].emo||""}</span>`;
       el.setAttribute("aria-label", canUndo ? `放返低 ${ITEMS[id].name}` : ITEMS[id].name);
+    }else if(shelfUsesPic()){
+      /* ⚠ 小學高卡：架上擺嘅係商品圖（pixel），籃度就一定要同一張圖
+         —— 否則學生掃完圖見到 emoji，會以為自己搵錯嘢。 */
+      el.innerHTML = itemArtHTML(id, "item-pic") + (n>1 ? `<span class="qt">×${n}</span>` : "");
+      el.setAttribute("aria-label", canUndo ? `放返低 ${smallName(id)} ${n} 件` : `${smallName(id)} ${n} 件`);
     }else{
       /* ⚠️ 件數要喺任何 mode 都顯示（小學高卡 ×2、中學·數 ×3） */
       el.innerHTML = `${ITEMS[id].emo}<span class="qt">${(n>1) ? "×"+n : ""}</span>`;
@@ -2827,10 +3160,13 @@ function renderCheck(){
       const b = document.createElement("button");
       b.type = "button";
       b.className = "mini small" + (i < state.cursor ? " done" : "");
-      const sh = shapeOf(id);
-      if(isShapeMode() && sh){
-        b.innerHTML = itemPicHTML(id);
-        b.setAttribute("aria-label", ITEMS[id].name);
+      /* ⚠ 跟貨架嗰邊嘅呈現（usesPicArt）：中學·形 / 小學高卡 = 商品圖，
+         其餘 = 實物 emoji。
+         ⚠ 之前用 `isShapeMode() && sh`：干擾物（shape:null）會跌入 else 用 emoji，
+           同一欄出現兩種圖 → 學生對唔上。 */
+      if(usesPicArt()){
+        b.innerHTML = itemArtHTML(id) + (n>1 ? `<span class="qt">×${n}</span>` : "");
+        b.setAttribute("aria-label", `${ITEMS[id].name}${n>1 ? ` ${n} 件` : ""}`);
       }else{
         b.innerHTML = `${ITEMS[id].emo}<span class="qt">${(n>1) ? "×"+n : ""}</span>`;
         b.setAttribute("aria-label", `${smallName(id)} ${n} 件`);
@@ -2872,8 +3208,11 @@ function onCheckTap(i){
   state.cursor = i;
   const id = state.basket[i];
   const z = $("#zoomEmo");
-  if(isShapeMode() && itemImg(id)){
-    z.innerHTML = itemPicHTML(id, "lg");
+  const zsp = spriteSVG(id, "item-pic lg", ITEMS[id].name);
+  /* ⚠ 放大圖要跟貨架嗰邊嘅呈現：
+     小學高卡架上擺嘅係商品圖，放大卻出 emoji → 學生會以為唔同一件嘢。 */
+  if(usesPicArt() && zsp){
+    z.innerHTML = zsp;
   }else{
     z.textContent = ITEMS[id].emo;
   }
@@ -3199,7 +3538,16 @@ function paintResult(){
   let goods;
   if(r.shapeMode){
     if(r.allMatch) goods = "形：跟單啱晒（形+數）。";
-    else goods = "形：" + d + "（呢個係形狀／數量，下次再對。）";
+    else {
+      /* ⚠ 「呢個係形狀／數量，下次再對」只可以講喺真係「形狀／數量唔啱」嗰陣。
+         如果只係多咗干擾物（例如攞咗粟米），形同數量其實全部啱 →
+         加呢句會令學生以為自己「形狀攞錯」，同下面「忍住手」自相矛盾。
+         ⚠ 前綴同理：淨係多咗干擾物時用「貨：」（同非形狀模式一致），
+           唔好寫「形：多咗粟米」——粟米根本冇形狀。 */
+      const shapeMiss = r.missing.length || r.extra.length;
+      goods = (shapeMiss ? "形：" : "貨：") + d
+            + (shapeMiss ? "（呢個係形狀／數量，下次再對。）" : "");
+    }
     /* 干擾物（odd）→ 講「忍住手」；淨係係多咗形狀 → 講「有多取」。
        兩者唔可以重複講，否則句子會變「多咗 X…有多取／多咗干擾。」咁冗贅。 */
     if(r.tookExtra){
@@ -3730,13 +4078,6 @@ document.addEventListener("pointerdown", ()=>{
 }, {once:true});
 
 /* 啟動：每次開頁都係全新一節，唔會帶住上一個學生嘅進度 */
-preloadItemImages();
-// 貨圖載入後重畫地圖（避免 shelf 空白）
-Object.values(_imgCache).forEach(im=>{
-  if(!im) return;
-  const kick = ()=>{ if(onMapScreen()) drawMap(); };
-  if(im.complete) kick(); else { im.addEventListener("load", kick); im.addEventListener("error", kick); }
-});
 renderStars(); renderBasket();
 say("PIXEL MART！行入無人超市，攞嘢記得付足錢。", "happy");
 go("cover");
